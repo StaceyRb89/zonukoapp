@@ -8,4 +8,6 @@ urlpatterns = [
     path("founding/", views.FoundingFamilySignupView.as_view(), name="founding"),
     path("founding/thanks/", views.FoundingFamilyThanksView.as_view(), name="thanks"),
     path("admin/metrics/", views.metrics_dashboard, name="metrics"),
+    path("", views.FoundingFamilySignupView.as_view(), name="founding"),
+    path("thanks/", views.FoundingFamilyThanksView.as_view(), name="thanks"),
 ]
