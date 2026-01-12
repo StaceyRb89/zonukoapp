@@ -33,9 +33,7 @@
                 <h2>Breakdown by age range</h2>
                 <ul>
                     {% for row in age_breakdown %}
-                        <li>{{ row.child_age_range }}: {{ row.count }}</li>
-                    {% empty %}
-                        <li>No signups yet.</li>
+                        <li>{{ row.label }}: {{ row.count }}</li>
                     {% endfor %}
                 </ul>
             </div>
