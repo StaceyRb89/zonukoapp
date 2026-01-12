@@ -11,3 +11,7 @@ def about(request):
 
 def how_it_works(request):
     return render(request, "core/how_it_works.html")
+
+
+def example_projects(request):
+    return render(request, "core/example_projects.html")

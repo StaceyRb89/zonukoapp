@@ -222,6 +222,17 @@ body {
     font-weight: 600;
 }
 
+.meta {
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-footer {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
 .pricing-callout {
     background: var(--accent);
     border-radius: 16px;
