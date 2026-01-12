@@ -194,6 +194,34 @@ body {
     box-shadow: 0 10px 20px rgba(31, 41, 51, 0.06);
 }
 
+.project-card {
+    position: relative;
+}
+
+.project-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+}
+
+.project-badge.spark {
+    background: #fef6e6;
+}
+
+.project-badge.lab {
+    background: #e8f4ff;
+}
+
 .bullet-grid {
     list-style: none;
     padding-left: 0;

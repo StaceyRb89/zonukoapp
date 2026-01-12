@@ -37,11 +37,20 @@ def metrics_dashboard(request):
         created_at__gte=now - timedelta(days=30)
     ).count()
 
-    age_breakdown = (
+    age_counts = (
         FoundingFamilySignup.objects.values("child_age_range")
         .annotate(count=Count("id"))
-        .order_by("child_age_range")
+        .values_list("child_age_range", "count")
     )
+    age_counts_map = {key: count for key, count in age_counts}
+    age_breakdown = [
+        {
+            "value": value,
+            "label": label,
+            "count": age_counts_map.get(value, 0),
+        }
+        for value, label in FoundingFamilySignup.AGE_RANGE_CHOICES
+    ]
 
     start_date = timezone.localdate() - timedelta(days=13)
     daily_queryset = (
