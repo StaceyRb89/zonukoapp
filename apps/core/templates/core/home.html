@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Zonuko | STEAM Learning Platform{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div>
+                <p class="badge">STEAM project learning platform</p>
+                <h1>Hands-on learning that keeps screen time minimal.</h1>
+                <p class="lead">
+                    Zonuko helps kids build confidence through quick Sparks, bigger Labs, and
+                    community-driven projects designed for real-world creativity.
+                </p>
+                <div class="hero-actions">
+                    <a class="button primary" href="#programs">Explore programs</a>
+                    <a class="button" href="{% url 'core:about' %}">Why Zonuko</a>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h2>This week at a glance</h2>
+                <ul class="checklist">
+                    <li>30-minute Sparks that fit into busy afternoons.</li>
+                    <li>Labs that stretch curiosity into bigger builds.</li>
+                    <li>Showcase Sundays to celebrate creativity.</li>
+                    <li>Collaboration Weekends for family team-ups.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="programs">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Learning paths that grow with your child</h2>
+            <p>Mix and match flexible activities to keep curiosity moving forward.</p>
+        </div>
+        <div class="card-grid">
+            <article class="card">
+                <h3>Sparks</h3>
+                <p>30-minute guided challenges that get kids building quickly and logging ideas offline.</p>
+            </article>
+            <article class="card">
+                <h3>Labs</h3>
+                <p>Multi-day projects that encourage deeper research, prototyping, and storytelling.</p>
+            </article>
+            <article class="card">
+                <h3>Kid-inspired projects</h3>
+                <p>Student-led ideas turned into community prompts so every child sees themselves as a creator.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section accent">
+    <div class="container">
+        <div class="split">
+            <div>
+                <h2>Community moments that matter</h2>
+                <p>
+                    Zonuko keeps families connected with Showcase Sundays and Collaboration Weekends,
+                    celebrating progress without constant screen time.
+                </p>
+                <p class="callout">New weekly schedules launch each Monday.</p>
+            </div>
+            <div class="card">
+                <h3>What’s included</h3>
+                <ul>
+                    <li>Printable guides and supply lists</li>
+                    <li>Short video intros with offline steps</li>
+                    <li>Reflection prompts to capture learning</li>
+                    <li>Safety-focused, parent-friendly tips</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
