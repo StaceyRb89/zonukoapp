@@ -222,6 +222,57 @@ body {
     font-weight: 600;
 }
 
+.pricing-callout {
+    background: var(--accent);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+}
+
+.help-text {
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+}
+
+.form-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.form-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-family: inherit;
+}
+
+.form-field textarea {
+    resize: vertical;
+}
+
+.form-error {
+    color: #b42318;
+    font-weight: 600;
+    margin-top: 0.35rem;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
 .site-footer {
     background: var(--surface);
     border-top: 1px solid var(--border);
