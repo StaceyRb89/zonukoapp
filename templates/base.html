@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Zonuko{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+</head>
+<body>
+    <div class="page">
+        {% include 'partials/nav.html' %}
+        <main class="main">
+            {% block content %}{% endblock %}
+        </main>
+        {% include 'partials/footer.html' %}
+    </div>
+</body>
+</html>
