@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}You’re on the list | Zonuko{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container narrow">
+        <div class="card">
+            <h1>You’re on the list</h1>
+            <p class="lead">Thanks for registering your interest. We’ll email you when founding access opens.</p>
+            <div class="form-actions">
+                <a class="button primary" href="{% url 'core:home' %}">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
