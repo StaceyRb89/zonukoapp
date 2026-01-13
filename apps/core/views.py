@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.generic import TemplateView
 
 
 def home(request):
@@ -15,3 +16,7 @@ def how_it_works(request):
 
 def example_projects(request):
     return render(request, "core/example_projects.html")
+
+
+class FaqView(TemplateView):
+    template_name = "core/faq.html"
