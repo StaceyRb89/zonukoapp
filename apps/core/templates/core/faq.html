@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Parent FAQ | Zonuko{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="section-heading">
+            <h1>Parent FAQ</h1>
+            <p class="lead">Clear answers to the questions UK parents ask most — so you can decide with confidence.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Quick answers for busy parents</h2>
+            <p>Safety, supervision, screen use, and suitability — all in one place.</p>
+        </div>
+        <div class="card-grid">
+            <article class="card">
+                <h2>Is Zonuko safe for children?</h2>
+                <p>Yes. Zonuko is designed to remove the risks common in social and learning platforms.</p>
+                <p>There is no direct messaging, no public comments or follower counts, and no open profiles.</p>
+                <p>All sharing is optional, parent-approved, and moderated before being showcased. Children use avatars and usernames only, and activity happens in age-appropriate spaces.</p>
+            </article>
+            <article class="card">
+                <h2>How much screen time does this involve?</h2>
+                <p>Screens are used intentionally — for planning, creating, and reflecting — not passive watching or scrolling.</p>
+                <p>Some projects involve design or programming, but screen time is always purposeful and linked to creating something.</p>
+            </article>
+            <article class="card">
+                <h2>Will my child need constant supervision?</h2>
+                <p>Projects are designed for independent work, with light supervision as appropriate. Parents are encouraged to assess when input is needed and step back wherever possible.</p>
+                <p>Some projects involve materials or tools that may require light supervision, and this is always clearly indicated.</p>
+            </article>
+            <article class="card">
+                <h2>What if my child loses interest or skips a week?</h2>
+                <p>That’s okay. Zonuko isn’t built around streaks, pressure, or punishments.</p>
+                <p>Projects are flexible and designed to be picked up again later and fit around busy weeks.</p>
+                <p>Progress is about confidence and curiosity, not completion.</p>
+            </article>
+            <article class="card">
+                <h2>Is this suitable if my child isn’t “technical”?</h2>
+                <p>Yes. Zonuko isn’t about being good at science or coding.</p>
+                <p>Projects include creative design, problem-solving, storytelling, and real-world thinking.</p>
+                <p>Every learner has an entry point — building, sketching, testing, improving, or reflecting.</p>
+            </article>
+            <article class="card">
+                <h2>How do the age tracks work?</h2>
+                <p>Zonuko uses three flexible age tracks:</p>
+                <ul>
+                    <li>Imaginauts (6–10): guided, playful building</li>
+                    <li>Navigators (11–13): deeper challenges and experimentation</li>
+                    <li>Trailblazers (14–16): open-ended design and real-world problem solving</li>
+                </ul>
+                <p>Children aren’t locked in — parents can adjust tracks based on confidence and interest.</p>
+            </article>
+            <article class="card">
+                <h2>What do parents actually see?</h2>
+                <p>Parents can see which projects were attempted, reflections saved by their child, and a private skills portfolio over time.</p>
+                <p>Nothing is shared publicly without approval.</p>
+            </article>
+            <article class="card">
+                <h2>Is Zonuko tutoring or exam prep?</h2>
+                <p>No. Zonuko is a calm, project-based learning platform designed to build confidence, resilience, and creative thinking — not to replace school or teach to tests.</p>
+            </article>
+            <article class="card">
+                <h2>Why should I join as a founding family?</h2>
+                <p>Founding families get early access before public launch, help shape what Zonuko becomes, and can lock in a lower founding price while their membership remains active.</p>
+                <p>There’s no obligation — just a chance to be part of building something thoughtful from the start.</p>
+            </article>
+            <article class="card">
+                <h2>What happens after I sign up?</h2>
+                <p>You’ll receive a launch email when Zonuko opens, clear instructions to get started, and the option to give feedback as a founding family.</p>
+                <p>No spam. No pressure.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Ready to join the founding families?</h2>
+            <p>Get early access and help shape what Zonuko becomes from the very start.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'founding:founding' %}">Join the founding families</a>
+            <a class="button" href="{% url 'core:home' %}">Back to Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
