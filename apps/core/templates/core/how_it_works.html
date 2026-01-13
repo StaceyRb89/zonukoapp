@@ -35,26 +35,26 @@
         </div>
     </div>
 </section>
-<section>
+<section class="section accent">
     <div class="container">
         <div class="section-heading">
             <h2>A week at a glance</h2>
             <p>A simple rhythm that keeps momentum without turning into another commitment.</p>
-            <ul>
-                <li>Mon: New weekly schedule drops (quick wins + one deeper build)</li>
-                <li>Any day: 30–60 minutes of hands-on making, at your pace</li>
-                <li>Optional: Save a reflection to the private portfolio</li>
-                <li>Weekend idea: Family team-up projects (optional)</li>
-                <li>Sun: Low-pressure “Showcase” moments (parent-approved only)</li>
-            </ul>
         </div>
+        <ul class="checklist">
+            <li><strong>Monday:</strong> New weekly schedule drops (quick wins + one deeper build)</li>
+            <li><strong>Any day:</strong> 30–60 minutes of hands-on making, at your pace</li>
+            <li><strong>Optional:</strong> Save a reflection to the private portfolio</li>
+            <li><strong>Weekend idea:</strong> Family team-up projects (optional)</li>
+            <li><strong>Sunday:</strong> Low-pressure "Showcase" moments (parent-approved only)</li>
+        </ul>
     </div>
 </section>
 
-<section class="section safety">
+<section class="section">
     <div class="container">
         <div class="section-heading">
-            <h2>Built for creativity without the pressures of social media.</h2>
+            <h2>Built for creativity without the pressures of social media</h2>
             <p>Quick guardrails you can scan in seconds.</p>
         </div>
         <ul class="bullet-grid">
@@ -63,40 +63,49 @@
             <li>Admin moderation before showcasing</li>
             <li>Separate age-appropriate community spaces</li>
         </ul>
-        <p>More safeguards include no public comments or follower counts, avatars/usernames only, and admin review before featuring work.</p>
+        <div class="card" style="margin-top: 1.5rem;">
+            <p class="callout">More safeguards include no public comments or follower counts, avatars/usernames only, and admin review before featuring work.</p>
+        </div>
     </div>
 </section>
 
-<section class="section">
+<section class="section accent">
     <div class="container">
         <div class="section-heading">
-            <h2>Parent dashboard: what you’ll see</h2>
+            <h2>Parent dashboard: what you'll see</h2>
             <p>See progress clearly without hovering.</p>
-            <p>Projects attempted and child reflections.</p>
-            <p>Skills portfolio history over time.</p>
-            <p>Optional printable portfolios for offline records.</p>
-            <p>Full visibility and control over sharing.</p>
         </div>
+        <ul class="checklist">
+            <li>Projects attempted and child reflections</li>
+            <li>Skills portfolio history over time</li>
+            <li>Optional printable portfolios for offline records</li>
+            <li>Full visibility and control over sharing</li>
+        </ul>
     </div>
 </section>            
-<section>
-    <div>
-        <li>Project history</li>
-        <p>What they tried, what they changed, and what they learned.</p>
-
-        <li>Skills over time</li>
-
-        <p>A private portfolio that shows growth across weeks and projects.</p>
-       <li>Sharing controls</li>
-
-        <p>Approve what’s saved or shared — or keep everything private.</p>
-
-        <li>Guidance at a glance</li>
-
-        <p>Notes on materials, setup, and when adult support is recommended.</p>
+<section class="section">
+    <div class="container">
+        <div class="card-grid">
+            <article class="card">
+                <h3>Project history</h3>
+                <p>What they tried, what they changed, and what they learned.</p>
+            </article>
+            <article class="card">
+                <h3>Skills over time</h3>
+                <p>A private portfolio that shows growth across weeks and projects.</p>
+            </article>
+            <article class="card">
+                <h3>Sharing controls</h3>
+                <p>Approve what's saved or shared — or keep everything private.</p>
+            </article>
+            <article class="card">
+                <h3>Guidance at a glance</h3>
+                <p>Notes on materials, setup, and when adult support is recommended.</p>
+            </article>
         </div>
     </div>
 </section>
+
 
 <section class="section">
     <div class="container">
@@ -118,13 +127,10 @@
     </div>
 </section>
 
-<!-- TEMP: How it Works copy updated -->
-
-
 <section class="section">
     <div class="container">
         <div class="hero-actions">
-            <a class="button primary" href="{% url 'core:example_projects' %}"></a>
+            <a class="button primary" href="{% url 'core:example_projects' %}">Example Projects</a>
             <a class="button primary" href="{% url 'founding:founding' %}">Join the founding families</a>
             <a class="button" href="{% url 'core:home' %}">Back to Home</a>
         </div>
