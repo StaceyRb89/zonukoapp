@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Join the founding families | Zonuko{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h1>Join the founding families</h1>
+            <p class="lead">
+                Zonuko is launching soon. Founding families help shape the platform and get early access at a special price.
+            </p>
+        </div>
+        <div class="split">
+            <div>
+                <div class="pricing-callout">
+                    <p><strong>Founding families price: £9.99/month (first 200 signups)</strong></p>
+                    <p>Lifetime lock-in: keep this price for life as long as your membership stays active.</p>
+                </div>
+                <p class="callout">No spam. No pressure. You’ll get a launch email with next steps.</p>
+                <p class="meta">Independent by design, with light supervision as appropriate.</p>
+                <div class="card">
+                    <h2>What founders get</h2>
+                    <ul>
+                        <li>Early access before the public launch</li>
+                        <li>A say in what we build next</li>
+                        <li>Founding badge on your account</li>
+                        <li>Locked-in pricing while your subscription remains active</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Register your interest</h2>
+                <p class="help-text">Tell us a little about your family so we can invite you first.</p>
+                <form method="post" class="form-grid">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <p class="form-error">{{ form.non_field_errors|striptags }}</p>
+                    {% endif %}
+                    <div class="form-field">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <p class="form-error">{{ form.name.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="form-error">{{ form.email.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.child_age_range.label_tag }}
+                        {{ form.child_age_range }}
+                        {% if form.child_age_range.errors %}
+                            <p class="form-error">{{ form.child_age_range.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.excited_for.label_tag }}
+                        {{ form.excited_for }}
+                        {% if form.excited_for.errors %}
+                            <p class="form-error">{{ form.excited_for.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-actions">
+                        <button class="button primary" type="submit">Join the founding list</button>
+                        <a class="button" href="{% url 'core:home' %}">Back to Home</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

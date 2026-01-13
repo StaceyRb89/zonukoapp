@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}How Zonuko Works | Zonuko{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="section-heading">
+            <h1>How Zonuko works (for parents)</h1>
+            <p class="lead">Hands-on projects. Minimal screen time. Parent-controlled sharing.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Three simple steps</h2>
+            <p>Every week is designed to be calm, focused, and doable for families.</p>
+        </div>
+        <div class="card-grid">
+            <article class="card">
+                <h3>1. Choose</h3>
+                <p>Select a small number of age-appropriate projects based on interests.</p>
+            </article>
+            <article class="card">
+                <h3>2. Make</h3>
+                <p>Kids work offline using everyday materials, with mistakes encouraged.</p>
+                <p class="meta">Independent by design, with light supervision as appropriate.</p>
+            </article>
+            <article class="card">
+                <h3>3. Share safely</h3>
+                <p>Uploads happen only after parent approval and save to a private portfolio.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section safety">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Safety-first snapshot</h2>
+            <p>Quick guardrails you can scan in seconds.</p>
+        </div>
+        <ul class="bullet-grid">
+            <li>No direct messaging</li>
+            <li>No public comments or follower counts</li>
+            <li>Parent-controlled accounts</li>
+            <li>Avatars and usernames only</li>
+            <li>Admin moderation before showcasing</li>
+            <li>Separate age-appropriate community spaces</li>
+        </ul>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>What you can see as a parent</h2>
+            <p>See progress clearly without hovering.</p>
+        </div>
+        <div class="card-grid">
+            <article class="card">
+                <p>Projects attempted and child reflections.</p>
+            </article>
+            <article class="card">
+                <p>Skills portfolio history over time.</p>
+            </article>
+            <article class="card">
+                <p>Optional printable portfolios for offline records.</p>
+            </article>
+            <article class="card">
+                <p>Full visibility and control over sharing.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>What Zonuko is not</h2>
+        </div>
+        <div class="split">
+            <div class="card">
+                <ul>
+                    <li>Not tutoring or exam prep</li>
+                    <li>Not open social networking</li>
+                </ul>
+            </div>
+            <div class="card">
+                <p class="callout">Zonuko is a calm, project-based space for independent creators.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'founding:founding' %}">Join the founding families</a>
+            <a class="button" href="{% url 'core:home' %}">Back to Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
