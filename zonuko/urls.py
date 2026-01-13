@@ -7,4 +7,5 @@ urlpatterns = [
     path("", include("apps.founding.urls")),
     path("admin/", admin.site.urls),
     path("users/", include("apps.users.urls")),
+    path("founding/", include("apps.founding.urls")),
 ]

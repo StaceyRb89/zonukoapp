@@ -21,6 +21,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(map_age_bands, migrations.RunPython.noop),
         migrations.AlterField(
             model_name="foundingfamilysignup",
             name="child_age_range",
