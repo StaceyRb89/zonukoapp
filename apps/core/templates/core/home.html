@@ -8,51 +8,148 @@
         <div class="hero-content">
             <div>
                 <p class="badge">STEAM project learning platform</p>
-                <h1>Hands-on learning that keeps screen time minimal.</h1>
+                <h1>From “I can’t” to “I built this.”</h1>
                 <p class="lead">
-                    Zonuko helps kids build confidence through quick Sparks, bigger Labs, and
-                    community-driven projects designed for real-world creativity.
+                    Hands-on STEAM projects for ages 6–16 that build confidence and real-world skills — with minimal
+                    screen time.
                 </p>
-                <p class="trust-line">Safely, at their own pace — with parent-controlled sharing and age-appropriate spaces.</p>
+                <p class="lead">Designed for Imaginauts (ages 6–10), Navigators (ages 11–13) and Trailblazers (ages 14–16).</p>
+                <p class="trust-line">Designed by UK educators</p>
                 <div class="hero-actions">
-                    <a class="button primary" href="{% url 'core:how_it_works' %}">See how it works (for parents)</a>
+                    <a class="button primary" href="{% url 'core:example_projects' %}">Explore a project</a>
                     <a class="button" href="{% url 'founding:founding' %}">Join the founding families</a>
                 </div>
+                <p class="callout">Built with parents. Designed for kids.</p>
             </div>
             <div class="hero-card">
-                <h2>This week at a glance</h2>
+                <h2>Confidence grows when kids build</h2>
                 <ul class="checklist">
-                    <li>30-minute Sparks that fit into busy afternoons.</li>
-                    <li>Labs that stretch curiosity into bigger builds.</li>
-                    <li>Showcase Sundays to celebrate creativity.</li>
-                    <li>Collaboration Weekends for family team-ups.</li>
+                    <li>Real projects that lead to real pride.</li>
+                    <li>Everyday materials, minimal screen time.</li>
+                    <li>Parent-approved sharing, always optional.</li>
+                    <li>Age-appropriate tracks that evolve with them.</li>
                 </ul>
             </div>
         </div>
     </div>
 </section>
 
-<section class="section" id="parents">
+<section class="section">
+    <div class="container">
+        <ul class="bullet-grid">
+            <li>UK educator-designed</li>
+            <li>Age-appropriate tracks: Imaginauts, Navigators, Trailblazers</li>
+            <li>Parent-controlled accounts</li>
+            <li>Moderated sharing</li>
+            <li>Minimal screen time</li>
+        </ul>
+    </div>
+</section>
+
+<section class="section">
     <div class="container">
         <div class="section-heading">
-            <h2>Designed with parents in mind</h2>
-            <p>Zonuko is built to give children independence without sacrificing safety.</p>
+            <h2>Real projects. Real thinking. Real pride.</h2>
+            <p>
+                Children build with everyday materials, test ideas, and improve designs. The focus is on confidence —
+                finishing something real and feeling proud of it.
+            </p>
+        </div>
+        <ul class="checklist">
+            <li>Bridges that hold weight</li>
+            <li>Simple circuits that light up</li>
+            <li>Household objects redesigned to work better</li>
+        </ul>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'core:example_projects' %}">See example projects</a>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="tracks">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Choose your child’s track</h2>
+            <p>Children can move between tracks as they grow — start where they feel confident.</p>
         </div>
         <div class="card-grid">
             <article class="card">
-                <h3>Hands-on first</h3>
-                <p>Children work offline on hands-on projects that keep focus away from screens.</p>
+                <h3>Imaginauts (6–10)</h3>
+                <p>Playful, confidence-building challenges that make learning feel fun.</p>
+                <p class="card-footer">Quick wins that help kids say “I can do this.”</p>
             </article>
             <article class="card">
-                <h3>Parent-approved sharing</h3>
-                <p>Sharing is always parent-approved, with no open messaging or public profiles.</p>
+                <h3>Navigators (11–13)</h3>
+                <p>Deeper projects that develop problem-solving and independence.</p>
+                <p class="card-footer">Testing ideas, improving designs, learning persistence.</p>
             </article>
             <article class="card">
-                <h3>Private progress</h3>
-                <p>Progress is saved privately as a skills portfolio, not a public feed.</p>
+                <h3>Trailblazers (14–16)</h3>
+                <p>Real-world challenges that build ownership and future-ready skills.</p>
+                <p class="card-footer">Design thinking, prototyping, explaining and presenting work.</p>
             </article>
         </div>
-        <p class="callout">Parents stay in control, while children stay focused on creating.</p>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'core:how_it_works' %}">Find the right starting point</a>
+        </div>
+    </div>
+</section>
+
+<section class="section accent">
+    <div class="container">
+        <div class="section-heading">
+            <h2>Why Zonuko works</h2>
+        </div>
+        <div class="card-grid">
+            <article class="card">
+                <h3>Confidence through safe failure</h3>
+                <p>Kids learn it’s okay to get it wrong the first time.</p>
+                <p>They practise trying again without pressure.</p>
+            </article>
+            <article class="card">
+                <h3>Made for hands-on, creative learners</h3>
+                <p>Not every child loves worksheets.</p>
+                <p>Zonuko lets them learn by making.</p>
+            </article>
+            <article class="card">
+                <h3>Skills that matter in the real world</h3>
+                <p>Children build, test and explain what they’ve made.</p>
+                <p>That’s how real problem-solving grows.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-heading">
+            <h2>How it works</h2>
+        </div>
+        <div class="card-grid">
+            <article class="card">
+                <h3>1) Pick a project suited to your child’s track</h3>
+            </article>
+            <article class="card">
+                <h3>2) Build offline using simple, everyday materials</h3>
+            </article>
+            <article class="card">
+                <h3>3) Capture progress if you choose, with parent-approved sharing</h3>
+            </article>
+        </div>
+        <div class="split">
+            <div>
+                <h3>What’s included</h3>
+                <ul>
+                    <li>Printable guides and supply lists</li>
+                    <li>Short optional video introductions</li>
+                    <li>Reflection prompts to support learning</li>
+                    <li>Safety-focused, parent-friendly tips</li>
+                </ul>
+            </div>
+            <div class="hero-actions">
+                <a class="button primary" href="{% url 'core:example_projects' %}">Explore a project</a>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -60,124 +157,128 @@
     <div class="container">
         <div class="section-heading">
             <h2>Safety-first by design</h2>
-            <p>Clear safeguards keep the community supportive, calm, and age-appropriate.</p>
+            <p>
+                Zonuko gives children independence without exposing them to open social platforms. Safety is built in,
+                not bolted on.
+            </p>
         </div>
         <ul class="bullet-grid">
             <li>No direct messaging</li>
-            <li>No public comments or follower counts</li>
             <li>Parent-controlled accounts</li>
-            <li>Avatars and usernames only</li>
-            <li>Admin moderation before showcasing</li>
-            <li>Separate age-appropriate community spaces</li>
+            <li>Separate age-appropriate spaces</li>
+            <li>Moderated showcasing</li>
         </ul>
-    </div>
-</section>
-
-<section class="section" id="programs">
-    <div class="container">
-        <div class="section-heading">
-            <h2>Learning paths that grow with your child</h2>
-            <p>Mix and match flexible activities to keep curiosity moving forward.</p>
-        </div>
-        <div class="card-grid">
-            <article class="card">
-                <h3>Sparks</h3>
-                <p>30-minute guided challenges that get kids building quickly and logging ideas offline.</p>
-            </article>
-            <article class="card">
-                <h3>Labs</h3>
-                <p>Multi-day projects that encourage deeper research, prototyping, and storytelling.</p>
-            </article>
-            <article class="card">
-                <h3>Kid-inspired projects</h3>
-                <p>Student-led ideas turned into community prompts so every child sees themselves as a creator.</p>
-            </article>
+        <details class="card">
+            <summary>More safeguards</summary>
+            <ul>
+                <li>No public comments or follower counts</li>
+                <li>Avatars and usernames only</li>
+                <li>Admin review before featuring work</li>
+            </ul>
+        </details>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'core:how_it_works' %}">Read our safety approach</a>
         </div>
     </div>
 </section>
 
-<section class="section">
+<section class="section" id="example-projects">
     <div class="container">
         <div class="section-heading">
             <h2>Example projects</h2>
-            <p>
-                A quick look at the kinds of hands-on builds kids do in Zonuko. These are previews — full projects
-                include guidance, reflection prompts, and parent-controlled sharing.
-            </p>
+            <p>Real builds using everyday materials, designed to help children finish proud.</p>
         </div>
         <div class="card-grid">
             <article class="card project-card">
                 <span class="project-badge spark">✨ Spark</span>
                 <h3>Bridge that holds weight</h3>
-                <p class="meta">Imaginauts (6–10) • Spark</p>
-                <p>Kids build a small bridge using paper and tape, then test and improve it.</p>
-                <p class="card-footer">Skills: problem-solving, persistence • Materials: paper, tape, coins</p>
+                <p class="meta">Imaginaut • Spark • 30–45 minutes</p>
+                <p><strong>What they learn:</strong> Testing ideas and improving designs.</p>
+                <p class="card-footer">Materials: paper, tape, coins</p>
             </article>
             <article class="card project-card">
                 <span class="project-badge lab">🧪 Lab</span>
                 <h3>Water filter (not for drinking)</h3>
-                <p class="meta">Navigators (11–13) • Lab</p>
-                <p>Kids create a simple filter for muddy water and compare results across tests.</p>
-                <p class="card-footer">Skills: observation, testing • Materials: bottle, sand, gravel, paper towel</p>
+                <p class="meta">Navigator • Lab • 60–90 minutes</p>
+                <p><strong>What they learn:</strong> Comparing results and refining a method.</p>
+                <p class="card-footer">Materials: bottle, sand, gravel, paper towel</p>
             </article>
             <article class="card project-card">
                 <span class="project-badge lab">🧪 Lab</span>
                 <h3>Improve a household object</h3>
-                <p class="meta">Trailblazers (14–16) • Lab</p>
-                <p>Kids redesign something at home to make it easier, safer, or more useful.</p>
-                <p class="card-footer">Skills: design thinking, iteration • Materials: everyday household items</p>
+                <p class="meta">Trailblazer • Lab • 2–3 hours</p>
+                <p><strong>What they learn:</strong> Design thinking and real-world problem-solving.</p>
+                <p class="card-footer">Materials: everyday household items</p>
+            </article>
+            <article class="card project-card">
+                <span class="project-badge lab">🧪 Lab</span>
+                <h3>Design a flood-safe street</h3>
+                <p class="meta">Navigator • Lab • 60–90 minutes</p>
+                <p><strong>What they learn:</strong> Planning and systems thinking.</p>
+                <p class="card-footer">Materials: paper, pencils, recycled packaging</p>
+            </article>
+            <article class="card project-card">
+                <span class="project-badge spark">✨ Spark</span>
+                <h3>Build a wind-powered model</h3>
+                <p class="meta">Imaginaut • Spark • 30–45 minutes</p>
+                <p><strong>What they learn:</strong> Cause and effect, experimentation.</p>
+                <p class="card-footer">Materials: paper, straws, string</p>
+            </article>
+            <article class="card project-card">
+                <span class="project-badge lab">🧪 Lab</span>
+                <h3>Plan a community event</h3>
+                <p class="meta">Trailblazer • Lab • 1–2 hours</p>
+                <p><strong>What they learn:</strong> Organisation and communication.</p>
+                <p class="card-footer">Materials: paper (optional slides)</p>
             </article>
         </div>
         <div class="hero-actions">
-            <a class="button primary" href="{% url 'core:example_projects' %}">See more example projects</a>
+            <a class="button primary" href="{% url 'core:example_projects' %}">See more projects</a>
         </div>
     </div>
 </section>
 
-<section class="section accent">
+<section class="section" id="fit">
     <div class="container">
+        <div class="section-heading">
+            <h2>Is Zonuko right for your family?</h2>
+        </div>
         <div class="split">
-            <div>
-                <h2>Community moments that matter</h2>
-                <p>
-                    Zonuko keeps families connected with Showcase Sundays and Collaboration Weekends,
-                    celebrating progress without constant screen time.
-                </p>
-                <p class="lead">All sharing is optional, moderated, and visible only with parent approval.</p>
-                <p class="callout">New weekly schedules launch each Monday.</p>
+            <div class="card">
+                <h3>Great fit if your child…</h3>
+                <ul>
+                    <li>Likes making or building things</li>
+                    <li>Learns best by doing</li>
+                    <li>Enjoys solving problems</li>
+                    <li>Wants to feel proud of something they’ve made</li>
+                </ul>
             </div>
             <div class="card">
-                <h3>What’s included</h3>
+                <h3>Not the best fit if you’re looking for…</h3>
                 <ul>
-                    <li>Printable guides and supply lists</li>
-                    <li>Short video intros with offline steps</li>
-                    <li>Reflection prompts to capture learning</li>
-                    <li>Safety-focused, parent-friendly tips</li>
+                    <li>Exam-prep or tutoring</li>
+                    <li>A social network or open chat</li>
+                    <li>Daily screen-based lessons</li>
+                    <li>Competitive rankings or grades</li>
                 </ul>
             </div>
         </div>
     </div>
 </section>
 
-<section class="section" id="founding">
+<section class="section accent" id="founding">
     <div class="container">
         <div class="section-heading">
-            <h2>For parents</h2>
-            <p>Get clarity and confidence as your child explores new ideas.</p>
+            <h2>Join the founding families</h2>
         </div>
-        <div class="card-grid">
-            <article class="card">
-                <p>See what your child has tried, built, and learned.</p>
-            </article>
-            <article class="card">
-                <p>Evidence of real effort and problem-solving — not grades.</p>
-            </article>
-            <article class="card">
-                <p>Optional printable portfolios for offline records.</p>
-            </article>
-            <article class="card">
-                <p>Clear visibility of uploads, reflections, and progress.</p>
-            </article>
+        <p>
+            Get early access, help shape the platform, and receive founding-member perks. Founding families help us build
+            the best possible experience for children and parents.
+        </p>
+        <p class="meta">Email address</p>
+        <p class="callout">No spam. We’ll only email you about launch and early access.</p>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'founding:founding' %}">Join founding families</a>
         </div>
     </div>
 </section>
@@ -185,23 +286,12 @@
 <section class="section">
     <div class="container">
         <div class="section-heading">
-            <h2>Who it’s for</h2>
+            <h2>Ready to see what your child can build?</h2>
+            <p>Help them build confidence, curiosity, and pride — through real making.</p>
         </div>
-        <div class="split">
-            <div class="card">
-                <h3>For</h3>
-                <ul>
-                    <li>Curious children who enjoy making, building, and exploring</li>
-                    <li>Families who value independence and creativity</li>
-                </ul>
-            </div>
-            <div class="card">
-                <h3>Not for</h3>
-                <ul>
-                    <li>Tutoring or exam preparation</li>
-                    <li>Open social networking or chat platforms</li>
-                </ul>
-            </div>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'core:example_projects' %}">Explore a project</a>
+            <a class="button" href="{% url 'founding:founding' %}">Join the founding families</a>
         </div>
     </div>
 </section>

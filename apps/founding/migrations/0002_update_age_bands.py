@@ -34,4 +34,5 @@ class Migration(migrations.Migration):
                 max_length=16,
             ),
         ),
+        migrations.RunPython(map_age_bands, migrations.RunPython.noop),
     ]
