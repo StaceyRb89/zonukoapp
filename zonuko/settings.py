@@ -16,7 +16,19 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", True)
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() or ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() or [
+    "localhost", 
+    "127.0.0.1",
+    "zonuko.co.uk",
+    "www.zonuko.co.uk",
+    "zonuko.onrender.com",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://zonuko.onrender.com",
+    "https://zonuko.co.uk",
+    "https://www.zonuko.co.uk",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
