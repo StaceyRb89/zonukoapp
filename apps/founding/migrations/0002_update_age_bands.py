@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(map_age_bands, migrations.RunPython.noop),
+        # First, increase the max_length to accommodate the new values
         migrations.AlterField(
             model_name="foundingfamilysignup",
             name="child_age_range",
@@ -34,5 +34,6 @@ class Migration(migrations.Migration):
                 max_length=16,
             ),
         ),
+        # Then, update the existing data
         migrations.RunPython(map_age_bands, migrations.RunPython.noop),
     ]

@@ -3,8 +3,13 @@ Django settings for Zonuko project.
 """
 from pathlib import Path
 import os
+import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / ".env")
 
 
 def env_bool(name: str, default: bool = False) -> bool:
@@ -19,6 +24,7 @@ DEBUG = env_bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() or [
     "localhost", 
     "127.0.0.1",
+    "178.62.107.167",
     "zonuko.co.uk",
     "www.zonuko.co.uk",
     "zonuko.onrender.com",
@@ -73,22 +79,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "zonuko.wsgi.application"
 
-DB_ENGINE = os.environ.get("DB_ENGINE", "django.db.backends.sqlite3")
-DB_NAME = os.environ.get("DB_NAME", BASE_DIR / "db.sqlite3")
-DB_USER = os.environ.get("DB_USER", "")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
-DB_HOST = os.environ.get("DB_HOST", "")
-DB_PORT = os.environ.get("DB_PORT", "")
-
+# Database configuration
 DATABASES = {
-    "default": {
-        "ENGINE": DB_ENGINE,
-        "NAME": DB_NAME,
-        "USER": DB_USER,
-        "PASSWORD": DB_PASSWORD,
-        "HOST": DB_HOST,
-        "PORT": DB_PORT,
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
