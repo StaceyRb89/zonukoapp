@@ -26,6 +26,12 @@
         <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             <h2 style="margin-top: 0; color: #667eea;">💳 Subscription Status</h2>
             {% if has_subscription %}
+                {% if parent_profile.subscription.founding_member %}
+                    <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <strong>✨ FOUNDING FAMILY MEMBER ✨</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.95;">£9.99/month locked for life</p>
+                    </div>
+                {% endif %}
                 {% if parent_profile.subscription.is_in_trial %}
                     <p style="color: #f59e0b; font-weight: bold;">🎉 Free Trial Active</p>
                     <p style="font-size: 14px; color: #666;">{{ parent_profile.subscription.days_until_trial_end }} days remaining in your trial</p>
@@ -33,6 +39,9 @@
                 {% else %}
                     <p style="color: green; font-weight: bold;">✓ Active Subscription</p>
                     <p style="font-size: 14px; color: #666;">Next billing: {{ parent_profile.subscription.current_period_end|date:"F d, Y" }}</p>
+                {% endif %}
+                {% if parent_profile.subscription.founding_member %}
+                    <p style="font-size: 13px; color: #f59e0b; margin-top: 10px; font-weight: 500;">💰 Your rate: £9.99/month forever (regular members pay £14.99)</p>
                 {% endif %}
             {% else %}
                 <p style="color: orange; font-weight: bold;">⚠ No Active Subscription</p>

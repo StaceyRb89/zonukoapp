@@ -16,8 +16,33 @@ class FoundingFamilySignupView(FormView):
     template_name = "founding/founding.html"
     form_class = FoundingFamilySignupForm
     success_url = reverse_lazy("founding:thanks")
+    
+    # Set the limit for founding family signups (you can reserve some spots)
+    FOUNDING_LIMIT = 200
+    RESERVED_SPOTS = 10  # Keep 10 spots for troubleshooting/VIPs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        total_signups = FoundingFamilySignup.objects.count()
+        available_limit = self.FOUNDING_LIMIT - self.RESERVED_SPOTS
+        
+        context['total_signups'] = total_signups
+        context['founding_limit'] = self.FOUNDING_LIMIT
+        context['spots_remaining'] = max(0, available_limit - total_signups)
+        context['signups_closed'] = total_signups >= available_limit
+        context['progress_percentage'] = min(100, int((total_signups / available_limit) * 100))
+        
+        return context
 
     def form_valid(self, form):
+        # Check if limit reached before saving
+        total_signups = FoundingFamilySignup.objects.count()
+        available_limit = self.FOUNDING_LIMIT - self.RESERVED_SPOTS
+        
+        if total_signups >= available_limit:
+            form.add_error(None, "Sorry, all founding family spots have been claimed!")
+            return self.form_invalid(form)
+        
         form.save()
         return super().form_valid(form)
 

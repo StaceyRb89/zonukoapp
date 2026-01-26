@@ -11,25 +11,56 @@
                 Zonuko is launching soon. Founding families help shape the platform and get early access at a special price.
             </p>
         </div>
+        
+        {% if not signups_closed %}
+        <!-- Counter Display -->
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center; padding: 2rem; margin-bottom: 2rem;">
+            <h2 style="color: white; margin: 0 0 1rem 0;">🔥 <strong>{{ total_signups }} of {{ founding_limit }}</strong> Founding Family spots claimed</h2>
+            <div style="background: rgba(255,255,255,0.2); border-radius: 10px; height: 20px; margin: 1rem auto; max-width: 500px; overflow: hidden;">
+                <div style="background: #10b981; height: 100%; width: {{ progress_percentage }}%; transition: width 0.3s ease;"></div>
+            </div>
+            <p style="margin: 1rem 0 0 0; font-size: 1.1rem;">
+                {% if spots_remaining > 50 %}
+                    <strong>{{ spots_remaining }} spots remaining</strong> - Join {{ total_signups }} families already on the list!
+                {% elif spots_remaining > 20 %}
+                    ⚡ <strong>Only {{ spots_remaining }} spots left!</strong>
+                {% else %}
+                    🚨 <strong>ALMOST FULL!</strong> Only {{ spots_remaining }} spots remaining!
+                {% endif %}
+            </p>
+        </div>
+        {% else %}
+        <!-- Closed Message -->
+        <div class="card" style="background: #fee; border: 2px solid #fcc; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+            <h2 style="color: #c00;">❌ All Founding Family Spots Claimed</h2>
+            <p>All 200 founding family spots have been claimed! Join our waitlist to be notified when general signups open.</p>
+        </div>
+        {% endif %}
+        
         <div class="split">
             <div>
                 <div class="pricing-callout">
-                    <p><strong>Founding families price: £9.99/month (first 200 signups)</strong></p>
-                    <p>Lifetime lock-in: keep this price for life as long as your membership stays active.</p>
+                    <p><strong>Founding families price: £9.99/month</strong></p>
+                    <p>✨ <strong>Lifetime price lock:</strong> Keep £9.99/month forever as long as your membership stays active. After 200 families, the price increases to £14.99/month.</p>
                 </div>
-                <p class="callout">No spam. No pressure. You’ll get a launch email with next steps.</p>
+                <p class="callout">No spam. No pressure. You'll get a launch email with next steps.</p>
                 <div class="card">
-                    <h2>What founders get</h2>
+                    <h2>✨ What founding families get</h2>
                     <ul>
+                        <li><strong>£9.99/month locked for life</strong> (regular price £14.99)</li>
                         <li>Early access before the public launch</li>
                         <li>A say in what we build next</li>
-                        <li>Founding badge on your account</li>
-                        <li>Locked-in pricing while your subscription remains active</li>
+                        <li>Founding Family badge on your account</li>
+                        <li>First access to all new STEAM projects</li>
                     </ul>
                 </div>
             </div>
             <div class="card">
-                <h2>Register your interest</h2>
+                {% if signups_closed %}
+                    <p class="help-text" style="color: #c00;"><strong>Founding family signups are now closed.</strong> We'll open general signups soon!</p>
+                {% else %}
+                    <p class="help-text">Tell us a little about your family so we can invite you first.</p>
+                {% endif %}
                 <p class="help-text">Tell us a little about your family so we can invite you first.</p>
                 <form method="post" class="form-grid">
                     {% csrf_token %}
@@ -65,7 +96,9 @@
                         {% endif %}
                     </div>
                     <div class="form-actions">
-                        <button class="button primary" type="submit">Join the founding list</button>
+                        <button class="button primary" type="submit" {% if signups_closed %}disabled{% endif %}>
+                            {% if signups_closed %}Signups Closed{% else %}Claim Your Spot ({{ spots_remaining }} left){% endif %}
+                        </button>
                         <a class="button" href="{% url 'core:home' %}">Back to Home</a>
                     </div>
                 </form>

@@ -48,6 +48,18 @@ def create_checkout_session(request):
         return redirect('users:dashboard')
     
     try:
+        # Check if user is a founding family member
+        from apps.founding.models import FoundingFamilySignup
+        is_founding = FoundingFamilySignup.objects.filter(email__iexact=user.email).exists()
+        
+        # Set price based on founding member status
+        if is_founding:
+            price = 999  # £9.99 for founding families
+            description = 'Monthly access to STEAM learning projects (Founding Family - £9.99 locked for life)'
+        else:
+            price = 1499  # £14.99 for regular members
+            description = 'Monthly access to STEAM learning projects'
+        
         # Create or get Stripe customer
         subscription = getattr(parent_profile, 'subscription', None)
         
@@ -55,7 +67,7 @@ def create_checkout_session(request):
             customer = stripe.Customer.create(
                 email=user.email,
                 name=parent_profile.display_name or user.email,
-                metadata={'user_id': user.id}
+                metadata={'user_id': user.id, 'founding_member': is_founding}
             )
             customer_id = customer.id
             
@@ -63,13 +75,20 @@ def create_checkout_session(request):
             if not subscription:
                 subscription = Subscription.objects.create(
                     parent_profile=parent_profile,
-                    stripe_customer_id=customer_id
+                    stripe_customer_id=customer_id,
+                    founding_member=is_founding
                 )
             else:
                 subscription.stripe_customer_id = customer_id
+                subscription.founding_member = is_founding
                 subscription.save()
         else:
             customer_id = subscription.stripe_customer_id
+            # Update founding member status
+            subscription.founding_member = is_founding
+            subscription.save()
+        
+        print(f"Creating checkout for {user.email} - Founding: {is_founding}, Price: £{price/100:.2f}")
         
         # Create checkout session with 7-day trial
         checkout_session = stripe.checkout.Session.create(
@@ -80,9 +99,9 @@ def create_checkout_session(request):
                     'currency': 'gbp',
                     'product_data': {
                         'name': 'Zonuko Membership',
-                        'description': 'Monthly access to STEAM learning projects',
+                        'description': description,
                     },
-                    'unit_amount': 999,  # £9.99 in pence
+                    'unit_amount': price,
                     'recurring': {
                         'interval': 'month',
                     },
@@ -96,6 +115,7 @@ def create_checkout_session(request):
                 'trial_period_days': 7,
                 'metadata': {
                     'user_id': user.id,
+                    'founding_member': is_founding,
                 }
             },
         )
