@@ -3,8 +3,16 @@ __pycache__/
 *.sqlite3
 *.log
 .env
+.env.local
 .venv/
 venv/
 .DS_Store
 .idea/
 .vscode/
+staticfiles/
+db.sqlite3
+*.pyc
+media/
+check_subscription.py
+check_sub_details.py
+

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Member Dashboard - Zonuko{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+        <h1 style="margin: 0 0 10px 0;">⭐ Welcome to Your Zonuko Dashboard!</h1>
+        <p style="margin: 0; opacity: 0.9;">Hi {{ user.email }}! This is your member area (Staff Access - Development Mode)</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <!-- Profile Card -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; color: #667eea;">👤 Your Profile</h2>
+            {% if parent_profile %}
+                <p><strong>Display Name:</strong> {{ parent_profile.display_name|default:"Not set" }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Member Since:</strong> {{ parent_profile.created_at|date:"F d, Y" }}</p>
+            {% else %}
+                <p>Profile not yet created.</p>
+            {% endif %}
+        </div>
+
+        <!-- Subscription Card -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; color: #667eea;">💳 Subscription Status</h2>
+            {% if has_subscription %}
+                {% if parent_profile.subscription.is_in_trial %}
+                    <p style="color: #f59e0b; font-weight: bold;">🎉 Free Trial Active</p>
+                    <p style="font-size: 14px; color: #666;">{{ parent_profile.subscription.days_until_trial_end }} days remaining in your trial</p>
+                    <p style="font-size: 13px; color: #999; margin-top: 10px;">Trial ends: {{ parent_profile.subscription.trial_end|date:"F d, Y" }}</p>
+                {% else %}
+                    <p style="color: green; font-weight: bold;">✓ Active Subscription</p>
+                    <p style="font-size: 14px; color: #666;">Next billing: {{ parent_profile.subscription.current_period_end|date:"F d, Y" }}</p>
+                {% endif %}
+            {% else %}
+                <p style="color: orange; font-weight: bold;">⚠ No Active Subscription</p>
+                <p style="font-size: 14px; color: #666;">Start your 7-day free trial to access all content!</p>
+                <a href="{% url 'users:start_subscription' %}" style="display: inline-block; background: #667eea; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px;">
+                    Start Free Trial
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Children Section -->
+    <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="margin-top: 0; color: #667eea;">👦👧 Your Children</h2>
+        {% if children %}
+            <div style="display: grid; gap: 15px;">
+                {% for child in children %}
+                    <div style="border: 2px solid #f0f0f0; padding: 15px; border-radius: 8px;">
+                        <h3 style="margin: 0 0 10px 0;">{{ child.username }}</h3>
+                        <p style="margin: 5px 0;"><strong>Age Group:</strong> {{ child.get_age_range_display }}</p>
+                        <p style="margin: 5px 0;"><strong>PIN:</strong> ●●●● (hidden for security)</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #666;">No children added yet.</p>
+            <a href="#" style="display: inline-block; background: #764ba2; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px;">
+                + Add a Child
+            </a>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background: #fffbea; border-left: 4px solid #f59e0b; border-radius: 6px;">
+        <strong>🚧 Development Mode:</strong> This dashboard is currently only accessible to staff members. When ready for launch, we'll remove the staff-only restriction and add the payment integration.
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{% url 'account_logout' %}" style="color: #667eea; text-decoration: none;">Logout</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+Hello{{ if user.first_name }} {{ user.first_name }}{{ else }}!{{ endif }}
+
+Welcome to Zonuko! 🎉
+
+You're just one step away from joining our STEAM learning community.
+
+Please confirm your email address by clicking the link below:
+
+{{ activate_url }}
+
+This link will expire in 3 days for security.
+
+If you didn't create this account, you can safely ignore this email.
+
+Best regards,
+The Zonuko Team
+
+Built for curious kids and supportive families.
