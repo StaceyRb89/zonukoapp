@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if child.age_range == 'IMAGINAUTS' %}Your Learning Style! 🎉{% elif child.age_range == 'NAVIGATORS' %}Your Learning Style{% else %}Assessment Results{% endif %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                font-family: 'Comic Sans MS', 'Arial', sans-serif;
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                font-family: 'Arial', 'Helvetica', sans-serif;
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            {% else %}
+                font-family: 'Segoe UI', 'Helvetica', sans-serif;
+                background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            {% endif %}
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .results-container {
+            max-width: {% if child.age_range == 'IMAGINAUTS' %}700px{% else %}800px{% endif %};
+            background: white;
+            border-radius: {% if child.age_range == 'IMAGINAUTS' %}30px{% elif child.age_range == 'NAVIGATORS' %}20px{% else %}15px{% endif %};
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .big-emoji {
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}8em{% elif child.age_range == 'NAVIGATORS' %}6em{% else %}5em{% endif %};
+            margin-bottom: 20px;
+            animation: {% if child.age_range == 'IMAGINAUTS' %}bounce 1s ease-in-out infinite{% else %}none{% endif %};
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        h1 {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                color: #f5576c;
+                font-size: 3em;
+            {% elif child.age_range == 'NAVIGATORS' %}
+                color: #0066cc;
+                font-size: 2.5em;
+            {% else %}
+                color: #2c5364;
+                font-size: 2.2em;
+                font-weight: 600;
+            {% endif %}
+            margin-bottom: 20px;
+        }
+        
+        .learning-style {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 20px;
+                font-size: 2.5em;
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+                border-radius: 15px;
+                font-size: 2.2em;
+            {% else %}
+                background: linear-gradient(135deg, #434343 0%, #000000 100%);
+                border-radius: 10px;
+                font-size: 2em;
+                font-weight: 600;
+            {% endif %}
+            color: white;
+            padding: 30px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            {% if child.age_range == 'IMAGINAUTS' %}
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                box-shadow: 0 10px 30px rgba(91, 134, 229, 0.4);
+            {% else %}
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            {% endif %}
+        }
+        
+        .description {
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}1.3em{% else %}1.2em{% endif %};
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .strengths {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .strength {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            {% else %}
+                background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+            {% endif %}
+            padding: 20px;
+            border-radius: {% if child.age_range == 'IMAGINAUTS' %}15px{% else %}10px{% endif %};
+            font-size: 1.1em;
+            font-weight: {% if child.age_range == 'TRAILBLAZERS' %}600{% else %}bold{% endif %};
+            color: #333;
+        }
+        
+        .strength-emoji {
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}2em{% else %}1.8em{% endif %};
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 20px 40px;
+            font-size: 1.3em;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            {% if child.age_range == 'IMAGINAUTS' %}
+                border-radius: 50px;
+            {% elif child.age_range == 'NAVIGATORS' %}
+                border-radius: 25px;
+            {% else %}
+                border-radius: 8px;
+            {% endif %}
+        }
+        
+        .btn-primary {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+                box-shadow: 0 10px 30px rgba(91, 134, 229, 0.4);
+            {% else %}
+                background: linear-gradient(135deg, #434343 0%, #000000 100%);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            {% endif %}
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            {% if child.age_range == 'IMAGINAUTS' %}
+                box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                box-shadow: 0 15px 40px rgba(91, 134, 229, 0.6);
+            {% else %}
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            {% endif %}
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+            transform: translateY(-3px);
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            position: absolute;
+            animation: confetti-fall 3s linear infinite;
+        }
+        
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <div class="big-emoji">
+            {% if child.learning_style == 'Analytical Explorer' %}
+                🔬
+            {% elif child.learning_style == 'Creative Artist' %}
+                🎨
+            {% elif child.learning_style == 'Tech Builder' %}
+                🤖
+            {% elif child.learning_style == 'Inventor' %}
+                💡
+            {% elif child.learning_style == 'Digital Creator' %}
+                💻
+            {% else %}
+                🌟
+            {% endif %}
+        </div>
+        
+        <h1>{% if child.age_range == 'IMAGINAUTS' %}Amazing, {{ child.username }}!{% elif child.age_range == 'NAVIGATORS' %}Great job, {{ child.username }}!{% else %}Results for {{ child.username }}{% endif %}</h1>
+        
+        <div class="learning-style">
+            You're a {{ child.learning_style }}!
+        </div>
+        
+        <p class="description">
+            {% if child.learning_style == 'Analytical Explorer' %}
+                {% if child.age_range == 'IMAGINAUTS' %}
+                    You love discovering how things work and solving tricky problems! Science and math are your superpowers.
+                {% elif child.age_range == 'NAVIGATORS' %}
+                    You excel at understanding complex systems and enjoy the challenge of scientific discovery. Your analytical mind thrives on data and evidence.
+                {% else %}
+                    Your strengths lie in systematic analysis and empirical investigation. You approach challenges with logic and precision, making you well-suited for research and scientific inquiry.
+                {% endif %}
+            {% elif child.learning_style == 'Creative Artist' %}
+                {% if child.age_range == 'IMAGINAUTS' %}
+                    You see the world in beautiful colors and sounds! Art and music make you shine brightest.
+                {% elif child.age_range == 'NAVIGATORS' %}
+                    Your creative vision and artistic expression set you apart. You communicate ideas through visual and auditory mediums with natural talent.
+                {% else %}
+                    You possess exceptional creative intelligence and aesthetic sensibility. Your ability to synthesize artistic elements makes you a natural innovator in creative fields.
+                {% endif %}
+            {% elif child.learning_style == 'Tech Builder' %}
+                {% if child.age_range == 'IMAGINAUTS' %}
+                    You're amazing at building and creating with technology! Robots and gadgets are your playground.
+                {% elif child.age_range == 'NAVIGATORS' %}
+                    You combine engineering skills with technical knowledge to create innovative solutions. Technology is both your tool and passion.
+                {% else %}
+                    Your proficiency in technical design and implementation positions you at the intersection of innovation and practical application. You excel in translating concepts into functional systems.
+                {% endif %}
+            {% elif child.learning_style == 'Inventor' %}
+                {% if child.age_range == 'IMAGINAUTS' %}
+                    You're a natural problem-solver who loves making new things! Engineering and science are your tools.
+                {% elif child.age_range == 'NAVIGATORS' %}
+                    Your innovative mindset allows you to see problems as opportunities. You blend scientific understanding with creative engineering solutions.
+                {% else %}
+                    Your capacity for innovative problem-solving demonstrates advanced systems thinking. You integrate scientific principles with engineering methodologies to develop novel solutions.
+                {% endif %}
+            {% elif child.learning_style == 'Digital Creator' %}
+                {% if child.age_range == 'IMAGINAUTS' %}
+                    You blend art and technology like a pro! Digital creativity is where you excel.
+                {% elif child.age_range == 'NAVIGATORS' %}
+                    You merge artistic vision with technical skills, creating in the digital realm. Your work bridges creativity and technology seamlessly.
+                {% else %}
+                    Your unique synthesis of artistic sensibility and technical competence enables you to excel in digital media and interactive design. You represent the modern creative technologist.
+                {% endif %}
+            {% else %}
+                {% if child.age_range == 'IMAGINAUTS' %}
+                    You're curious about everything and love learning new things! The world is full of exciting discoveries for you.
+                {% elif child.age_range == 'NAVIGATORS' %}
+                    Your diverse interests and adaptable learning style make you a versatile thinker. You approach new subjects with enthusiasm and openness.
+                {% else %}
+                    Your intellectual versatility and broad curiosity enable you to engage effectively across multiple domains. You demonstrate exceptional adaptability in learning contexts.
+                {% endif %}
+            {% endif %}
+        </p>
+        
+        <div class="strengths">
+            {% for interest in child.interests %}
+                <div class="strength">
+                    <span class="strength-emoji">
+                        {% if interest == 'science' %}🔬
+                        {% elif interest == 'art' %}🎨
+                        {% elif interest == 'tech' %}💻
+                        {% elif interest == 'math' %}🔢
+                        {% elif interest == 'music' %}🎵
+                        {% elif interest == 'engineering' %}⚙️
+                        {% endif %}
+                    </span>
+                    {{ interest|title }}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="button-group">
+            <a href="{% url 'users:child_dashboard' %}" class="btn btn-primary">
+                {% if child.age_range == 'IMAGINAUTS' %}Start Learning! 🚀{% elif child.age_range == 'NAVIGATORS' %}Go to Dashboard{% else %}Continue to Dashboard{% endif %}
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Create confetti effect (only for Imaginauts)
+        {% if child.age_range == 'IMAGINAUTS' %}
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            for(let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 100);
+            }
+        }
+        
+        createConfetti();
+        {% endif %}
+    </script>
+</body>
+</html>

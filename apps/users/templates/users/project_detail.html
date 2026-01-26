@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ project.emoji }} {{ project.title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Age-appropriate styling based on child's age range */
+    {% if child.age_range == 'IMAGINAUTS' %}
+        :root {
+            --age-primary: linear-gradient(135deg, #ff6b9d 0%, #feca57 100%);
+            --age-bg: linear-gradient(135deg, #fff5f7 0%, #fffbf0 100%);
+            --age-card: #fff;
+            --age-text: #2d3748;
+            --age-accent: #ff6b9d;
+        }
+        .page-header {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive;
+            font-size: 2.5rem;
+        }
+        .btn-project {
+            font-size: 1.2rem;
+            border-radius: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    {% elif child.age_range == 'NAVIGATORS' %}
+        :root {
+            --age-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --age-bg: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%);
+            --age-card: #fff;
+            --age-text: #2d3748;
+            --age-accent: #667eea;
+        }
+        .page-header {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        .btn-project {
+            font-size: 1.1rem;
+            border-radius: 12px;
+        }
+    {% else %} {# TRAILBLAZERS #}
+        :root {
+            --age-primary: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            --age-bg: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            --age-card: #fff;
+            --age-text: #1a202c;
+            --age-accent: #4a5568;
+        }
+        .page-header {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        .btn-project {
+            font-size: 1rem;
+            border-radius: 8px;
+        }
+    {% endif %}
+
+    body {
+        background: var(--age-bg);
+        color: var(--age-text);
+    }
+
+    .project-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .video-container {
+        background: var(--age-card);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+        border-radius: 12px;
+        background: #000;
+    }
+
+    .video-wrapper iframe,
+    .video-wrapper video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .project-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .project-emoji {
+        font-size: 4rem;
+        margin-bottom: 10px;
+    }
+
+    .project-title {
+        background: var(--age-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+    }
+
+    .project-meta {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .meta-badge {
+        background: var(--age-primary);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .content-card {
+        background: var(--age-card);
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .content-card h2 {
+        background: var(--age-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+
+    .materials-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .materials-list li {
+        padding: 10px;
+        margin-bottom: 8px;
+        background: var(--age-bg);
+        border-radius: 8px;
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .materials-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 12px;
+        color: var(--age-accent);
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .btn-project {
+        background: var(--age-primary);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: inline-block;
+        text-decoration: none;
+        margin: 10px;
+    }
+
+    .btn-project:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #e2e8f0;
+        color: var(--age-text);
+    }
+
+    .action-buttons {
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .rating-stars {
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .star-input {
+        display: none;
+    }
+
+    .star-label {
+        font-size: 3rem;
+        color: #cbd5e0;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-block;
+        margin: 0 5px;
+    }
+
+    .star-label:hover,
+    .star-label.active {
+        color: #fbbf24;
+        transform: scale(1.2);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin: 10px 0;
+    }
+
+    .status-not-started {
+        background: #e2e8f0;
+        color: #4a5568;
+    }
+
+    .status-in-progress {
+        background: #667eea;
+        color: white;
+    }
+
+    .status-completed {
+        background: #48bb78;
+        color: white;
+    }
+
+    .pdf-download {
+        background: #f56565;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .pdf-download:hover {
+        background: #e53e3e;
+        color: white;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: var(--age-accent);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="project-container">
+    <a href="{% url 'users:child_dashboard' %}" class="back-link">← Back to Dashboard</a>
+
+    <!-- Project Header -->
+    <div class="project-header">
+        <div class="project-emoji">{{ project.emoji }}</div>
+        <h1 class="page-header project-title">{{ project.title }}</h1>
+        
+        <div class="project-meta">
+            <span class="meta-badge">{{ project.get_category_display }}</span>
+            <span class="meta-badge">{{ project.get_difficulty_display }}</span>
+            <span class="meta-badge">⏱️ {{ project.estimated_time }}</span>
+        </div>
+
+        {% if progress.status == 'not_started' %}
+            <span class="status-badge status-not-started">🆕 Not Started</span>
+        {% elif progress.status == 'in_progress' %}
+            <span class="status-badge status-in-progress">🚀 In Progress</span>
+        {% elif progress.status == 'completed' %}
+            <span class="status-badge status-completed">✅ Completed!</span>
+        {% endif %}
+    </div>
+
+    <!-- Video Player -->
+    {% if project.video_file or project.video_url %}
+    <div class="video-container">
+        <div class="video-wrapper">
+            {% if project.video_file %}
+                <video controls>
+                    <source src="{{ project.video_file.url }}" type="video/mp4">
+                    Your browser doesn't support video playback.
+                </video>
+            {% elif video_embed_url %}
+                <iframe src="{{ video_embed_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Description -->
+    {% if project.description %}
+    <div class="content-card">
+        <h2>📖 About This Project</h2>
+        <div>{{ project.description|safe }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Materials Needed -->
+    {% if project.materials_needed %}
+    <div class="content-card">
+        <h2>🛠️ What You'll Need</h2>
+        <ul class="materials-list">
+            {% for line in project.materials_needed.splitlines %}
+                {% if line.strip %}
+                    <li>{{ line }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Instructions -->
+    {% if project.instructions %}
+    <div class="content-card">
+        <h2>📝 Instructions</h2>
+        <div>{{ project.instructions|safe }}</div>
+    </div>
+    {% endif %}
+
+    <!-- PDF Guide Download -->
+    {% if project.pdf_guide %}
+    <div class="content-card" style="text-align: center;">
+        <h2>📄 Download Guide</h2>
+        <a href="{{ project.pdf_guide.url }}" class="pdf-download" download>
+            📥 Download PDF Guide
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        {% if progress.status == 'not_started' %}
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="start">
+                <button type="submit" class="btn-project">🚀 Start This Project!</button>
+            </form>
+        {% elif progress.status == 'in_progress' %}
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="complete">
+                <button type="submit" class="btn-project">✅ Mark as Complete!</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Rating System (only shown after completion) -->
+    {% if progress.status == 'completed' %}
+    <div class="rating-stars">
+        <h2 style="text-align: center; margin-bottom: 20px;">
+            {% if progress.rating %}
+                You rated this {{ progress.rating }} star{{ progress.rating|pluralize }}!
+            {% else %}
+                How did you like this project?
+            {% endif %}
+        </h2>
+        <form method="post" id="rating-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="rate">
+            <input type="hidden" name="rating" id="rating-value" value="{{ progress.rating|default:0 }}">
+            
+            {% for i in "12345" %}
+                <label class="star-label {% if progress.rating >= forloop.counter %}active{% endif %}" data-rating="{{ forloop.counter }}">
+                    ⭐
+                </label>
+            {% endfor %}
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Star rating interaction
+document.querySelectorAll('.star-label').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        document.getElementById('rating-value').value = rating;
+        
+        // Update star display
+        document.querySelectorAll('.star-label').forEach((s, index) => {
+            if (index < rating) {
+                s.classList.add('active');
+            } else {
+                s.classList.remove('active');
+            }
+        });
+        
+        // Submit the form
+        document.getElementById('rating-form').submit();
+    });
+});
+
+// Hover effect for stars
+document.querySelectorAll('.star-label').forEach(star => {
+    star.addEventListener('mouseenter', function() {
+        const rating = this.dataset.rating;
+        document.querySelectorAll('.star-label').forEach((s, index) => {
+            if (index < rating) {
+                s.style.color = '#fbbf24';
+            }
+        });
+    });
+});
+
+document.querySelector('.rating-stars')?.addEventListener('mouseleave', function() {
+    const currentRating = document.getElementById('rating-value').value;
+    document.querySelectorAll('.star-label').forEach((s, index) => {
+        if (index < currentRating) {
+            s.style.color = '#fbbf24';
+        } else {
+            s.style.color = '#cbd5e0';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-Hello{{ if user.first_name }} {{ user.first_name }}{{ else }}!{{ endif }}
+Hello{% if user.first_name %} {{ user.first_name }}{% else %}!{% endif %}
 
 Welcome to Zonuko! 🎉
 

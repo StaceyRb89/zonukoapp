@@ -10,6 +10,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("members/", include("apps.users.urls")),
     path("admin/", admin.site.urls),
+    path("tinymce/", include("tinymce.urls")),
 ]
 
 if settings.DEBUG:

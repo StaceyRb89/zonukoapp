@@ -55,27 +55,55 @@
 
     <!-- Children Section -->
     <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <h2 style="margin-top: 0; color: #667eea;">👦👧 Your Children</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #667eea;">👦👧 Your Children</h2>
+            <a href="{% url 'users:add_child' %}" style="display: inline-block; background: #764ba2; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">
+                + Add a Child
+            </a>
+        </div>
         {% if children %}
             <div style="display: grid; gap: 15px;">
                 {% for child in children %}
-                    <div style="border: 2px solid #f0f0f0; padding: 15px; border-radius: 8px;">
-                        <h3 style="margin: 0 0 10px 0;">{{ child.username }}</h3>
-                        <p style="margin: 5px 0;"><strong>Age Group:</strong> {{ child.get_age_range_display }}</p>
-                        <p style="margin: 5px 0;"><strong>PIN:</strong> ●●●● (hidden for security)</p>
+                    <div style="border: 2px solid #f0f0f0; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 48px;">{{ child.get_avatar_emoji }}</div>
+                            <div>
+                                <h3 style="margin: 0 0 5px 0;">{{ child.username }}</h3>
+                                <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Age Group:</strong> {{ child.get_age_range_display }}</p>
+                                {% if child.quiz_completed %}
+                                    <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 13px; margin-top: 5px;">
+                                        ✨ {{ child.learning_style }}
+                                    </div>
+                                {% else %}
+                                    <p style="margin: 5px 0; color: #999; font-size: 13px; font-style: italic;">Quiz not completed yet</p>
+                                {% endif %}
+                                <p style="margin: 8px 0 0 0; color: #999; font-size: 12px;"><strong>PIN:</strong> ●●●● (hidden for security)</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-direction: column; align-items: flex-end;">
+                            <div style="display: flex; gap: 10px;">
+                                <a href="{% url 'users:edit_child' child.id %}" style="color: #667eea; text-decoration: none; font-size: 14px;">Edit</a>
+                                <a href="{% url 'users:delete_child' child.id %}" style="color: #dc2626; text-decoration: none; font-size: 14px;">Remove</a>
+                            </div>
+                            {% if child.quiz_completed %}
+                                <form method="post" action="{% url 'users:reset_child_quiz' child.id %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="background: none; border: none; color: #f59e0b; text-decoration: underline; font-size: 12px; cursor: pointer; padding: 0;">
+                                        Reset Quiz
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <p style="color: #666;">No children added yet.</p>
-            <a href="#" style="display: inline-block; background: #764ba2; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px;">
-                + Add a Child
-            </a>
+            <p style="color: #666;">No children added yet. Click "+ Add a Child" above to get started!</p>
         {% endif %}
     </div>
 
-    <div style="margin-top: 30px; padding: 20px; background: #fffbea; border-left: 4px solid #f59e0b; border-radius: 6px;">
-        <strong>🚧 Development Mode:</strong> This dashboard is currently only accessible to staff members. When ready for launch, we'll remove the staff-only restriction and add the payment integration.
+    <div style="margin-top: 30px; padding: 20px; background: #dbeafe; border-left: 4px solid #667eea; border-radius: 6px;">
+        <strong>💡 Tip:</strong> Each child gets their own login with a 4-digit PIN, personalized recommendations based on their age group, and progress tracking.
     </div>
 
     <div style="margin-top: 20px; text-align: center;">

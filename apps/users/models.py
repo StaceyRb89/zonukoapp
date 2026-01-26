@@ -38,17 +38,42 @@ class ChildProfile(models.Model):
         (NAVIGATORS, "Navigators (11–13)"),
         (TRAILBLAZERS, "Trailblazers (14–16)"),
     ]
+    
+    AVATAR_CHOICES = [
+        ('astronaut', '👨‍🚀 Astronaut'),
+        ('scientist', '🔬 Scientist'),
+        ('doctor', '👩‍⚕️ Doctor'),
+        ('vet', '👨‍⚕️ Vet'),
+        ('chef', '👨‍🍳 Chef'),
+        ('artist', '👩‍🎨 Artist'),
+        ('teacher', '👨‍🏫 Teacher'),
+        ('firefighter', '👨‍🚒 Firefighter'),
+        ('engineer', '👷 Engineer'),
+        ('farmer', '👨‍🌾 Farmer'),
+        ('mechanic', '👨‍🔧 Mechanic'),
+        ('programmer', '👩‍💻 Programmer'),
+    ]
 
     parent = models.ForeignKey(ParentProfile, on_delete=models.CASCADE, related_name="children")
     username = models.CharField(max_length=30, unique=True)
     pin = models.CharField(max_length=4, help_text="4-digit PIN for child login")
     age_range = models.CharField(max_length=50, choices=AGE_RANGE_CHOICES)
-    avatar = models.ImageField(upload_to="avatars/children/", null=True, blank=True)
+    avatar = models.CharField(max_length=20, choices=AVATAR_CHOICES, default='astronaut')
+    interests = models.JSONField(default=list, blank=True, help_text="List of child's interests from quiz")
+    learning_style = models.CharField(max_length=50, blank=True, help_text="Result from learning style quiz")
+    quiz_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.username} ({self.age_range})"
+    
+    def get_avatar_emoji(self):
+        """Get the emoji for the avatar"""
+        for code, label in self.AVATAR_CHOICES:
+            if code == self.avatar:
+                return label.split()[0]  # Extract emoji from "👨‍🚀 Astronaut"
+        return '👨‍🚀'
 
     class Meta:
         verbose_name = "Child Profile"
@@ -137,3 +162,80 @@ class Subscription(models.Model):
     class Meta:
         verbose_name = "Subscription"
         verbose_name_plural = "Subscriptions"
+
+
+class Project(models.Model):
+    """STEAM projects for children to explore"""
+    SCIENCE = 'science'
+    TECH = 'tech'
+    ENGINEERING = 'engineering'
+    ART = 'art'
+    MATH = 'math'
+    
+    CATEGORY_CHOICES = [
+        (SCIENCE, 'Science'),
+        (TECH, 'Technology'),
+        (ENGINEERING, 'Engineering'),
+        (ART, 'Art'),
+        (MATH, 'Math'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    difficulty = models.IntegerField(default=1, help_text="1=Easy, 2=Medium, 3=Hard")
+    age_ranges = models.JSONField(default=list, help_text="List of age ranges: IMAGINAUTS, NAVIGATORS, TRAILBLAZERS")
+    tags = models.JSONField(default=list, help_text="Tags for recommendation matching")
+    emoji = models.CharField(max_length=10, default='🔬')
+    estimated_time = models.IntegerField(default=30, help_text="Estimated time in minutes")
+    
+    # Media files
+    video_file = models.FileField(upload_to='videos/', blank=True, null=True, help_text="Upload video file (will be stored on Digital Ocean Spaces)")
+    video_url = models.URLField(blank=True, help_text="Or paste YouTube/Vimeo URL")
+    pdf_guide = models.FileField(upload_to='guides/', blank=True, null=True, help_text="Printable PDF guide")
+    
+    # Content
+    materials_needed = models.TextField(blank=True)
+    instructions = models.TextField(blank=True)
+    
+    # Publishing
+    is_published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.emoji} {self.title}"
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Project"
+        verbose_name_plural = "Projects"
+
+
+class ProjectProgress(models.Model):
+    """Track child's progress and interaction with projects"""
+    STATUS_NOT_STARTED = 'not_started'
+    STATUS_IN_PROGRESS = 'in_progress'
+    STATUS_COMPLETED = 'completed'
+    
+    STATUS_CHOICES = [
+        (STATUS_NOT_STARTED, 'Not Started'),
+        (STATUS_IN_PROGRESS, 'In Progress'),
+        (STATUS_COMPLETED, 'Completed'),
+    ]
+    
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='project_progress')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='child_progress')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_NOT_STARTED)
+    rating = models.IntegerField(null=True, blank=True, help_text="1-5 stars")
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, help_text="Child's notes or reflections")
+    
+    def __str__(self):
+        return f"{self.child.username} - {self.project.title} ({self.status})"
+    
+    class Meta:
+        unique_together = ['child', 'project']
+        ordering = ['-started_at']
+        verbose_name = "Project Progress"
+        verbose_name_plural = "Project Progress"

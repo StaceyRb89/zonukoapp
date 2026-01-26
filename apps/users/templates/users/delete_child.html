@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Remove {{ child.username }} - Zonuko{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+        <h1 style="margin: 0 0 10px 0;">⚠️ Remove Child Profile</h1>
+        <p style="margin: 0; opacity: 0.9;">This action cannot be undone</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: {% if message.tags == 'error' %}#fee2e2; color: #991b1b;{% else %}#dbeafe; color: #1e40af;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 80px; margin-bottom: 20px;">{{ child.get_avatar_emoji }}</div>
+            <h2 style="margin: 0 0 10px 0; color: #1f2937;">{{ child.username }}</h2>
+            <p style="color: #6b7280; margin: 0;">{{ child.get_age_range_display }}</p>
+        </div>
+
+        <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 20px; border-radius: 6px; margin-bottom: 30px;">
+            <h3 style="margin: 0 0 10px 0; color: #991b1b;">Are you sure you want to remove this child?</h3>
+            <p style="margin: 0; color: #991b1b; font-size: 14px;">
+                This will permanently delete:
+            </p>
+            <ul style="margin: 10px 0 0 20px; color: #991b1b; font-size: 14px;">
+                <li>{{ child.username }}'s profile</li>
+                <li>Their login credentials</li>
+                <li>All their progress and activity (when implemented)</li>
+            </ul>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" style="flex: 1; background: #dc2626; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    Yes, Remove {{ child.username }}
+                </button>
+                <a href="{% url 'users:dashboard' %}" style="flex: 1; background: #667eea; color: white; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; text-align: center; display: inline-block;">
+                    Cancel, Keep Profile
+                </a>
+            </div>
+        </form>
+
+        <p style="text-align: center; color: #9ca3af; font-size: 13px; margin-top: 20px;">
+            💡 Tip: If you just want to update their information, use the "Edit" option instead.
+        </p>
+    </div>
+</div>
+
+<style>
+    button[type="submit"]:hover {
+        background: #b91c1c;
+    }
+</style>
+{% endblock %}

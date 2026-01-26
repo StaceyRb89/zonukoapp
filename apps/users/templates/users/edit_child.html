@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ child.username }} - Zonuko{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 40px auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
+        <h1 style="margin: 0 0 10px 0;">✏️ Edit {{ child.username }}</h1>
+        <p style="margin: 0; opacity: 0.9;">Update your child's profile information</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 15px; margin-bottom: 20px; border-radius: 8px; background: {% if message.tags == 'error' %}#fee2e2; color: #991b1b;{% else %}#dbeafe; color: #1e40af;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div style="margin-bottom: 25px;">
+                <label for="{{ form.username.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">
+                    Username *
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.username.errors|striptags }}</p>
+                {% endif %}
+                <p style="color: #6b7280; font-size: 13px; margin-top: 5px;">{{ form.username.help_text }}</p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label for="{{ form.age_range.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">
+                    Age Group *
+                </label>
+                {{ form.age_range }}
+                {% if form.age_range.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.age_range.errors|striptags }}</p>
+                {% endif %}
+                <p style="color: #6b7280; font-size: 13px; margin-top: 5px;">{{ form.age_range.help_text }}</p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #374151;">
+                    Choose an Avatar *
+                </label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;">
+                    {% for value, label in form.avatar.field.choices %}
+                        <label style="cursor: pointer; border: 3px solid {% if child.avatar == value %}#667eea{% else %}#e5e7eb{% endif %}; border-radius: 12px; padding: 15px; text-align: center; transition: all 0.2s; display: block;">
+                            <input type="radio" name="avatar" value="{{ value }}" {% if child.avatar == value %}checked{% endif %} style="display: none;" onchange="this.parentElement.parentElement.querySelectorAll('label').forEach(l => l.style.borderColor='#e5e7eb'); this.parentElement.style.borderColor='#667eea';">
+                            <div style="font-size: 40px; margin-bottom: 5px;">
+                                {% if value == 'robot' %}🤖{% elif value == 'rocket' %}🚀{% elif value == 'scientist' %}🔬{% elif value == 'astronaut' %}👨‍🚀{% elif value == 'brain' %}🧠{% elif value == 'star' %}⭐{% elif value == 'dino' %}🦖{% elif value == 'rainbow' %}🌈{% elif value == 'planet' %}🪐{% elif value == 'atom' %}⚛️{% elif value == 'magnet' %}🧲{% elif value == 'telescope' %}🔭{% endif %}
+                            </div>
+                            <div style="font-size: 12px; color: #6b7280;">
+                                {% if value == 'robot' %}Robot{% elif value == 'rocket' %}Rocket{% elif value == 'scientist' %}Scientist{% elif value == 'astronaut' %}Astronaut{% elif value == 'brain' %}Brain{% elif value == 'star' %}Star{% elif value == 'dino' %}Dinosaur{% elif value == 'rainbow' %}Rainbow{% elif value == 'planet' %}Planet{% elif value == 'atom' %}Atom{% elif value == 'magnet' %}Magnet{% elif value == 'telescope' %}Telescope{% endif %}
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% if form.avatar.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.avatar.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div style="background: #fffbea; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin-bottom: 25px;">
+                <strong>🔐 Change PIN (Optional)</strong>
+                <p style="margin: 10px 0 0 0; font-size: 14px;">Leave the PIN fields blank to keep the current PIN.</p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label for="{{ form.pin.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">
+                    New PIN (Optional)
+                </label>
+                {{ form.pin }}
+                {% if form.pin.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.pin.errors|striptags }}</p>
+                {% endif %}
+                <p style="color: #6b7280; font-size: 13px; margin-top: 5px;">{{ form.pin.help_text }}</p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label for="{{ form.pin_confirm.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">
+                    Confirm New PIN (Optional)
+                </label>
+                {{ form.pin_confirm }}
+                {% if form.pin_confirm.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.pin_confirm.errors|striptags }}</p>
+                {% endif %}
+                <p style="color: #6b7280; font-size: 13px; margin-top: 5px;">{{ form.pin_confirm.help_text }}</p>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <button type="submit" style="flex: 1; background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    Save Changes
+                </button>
+                <a href="{% url 'users:dashboard' %}" style="flex: 1; background: #e5e7eb; color: #374151; padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; text-align: center; display: inline-block;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="password"],
+    select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 15px;
+        transition: border-color 0.2s;
+    }
+    
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    
+    button[type="submit"]:hover {
+        background: #5568d3;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Kids Login - Zonuko{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 60px auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 48px; margin: 0 0 20px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            👋 Welcome Back!
+        </h1>
+        <p style="font-size: 20px; color: #6b7280; margin: 0;">
+            Ready to explore some STEAM projects?
+        </p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+            <strong>Oops!</strong> {{ form.non_field_errors|striptags }}
+        </div>
+    {% endif %}
+
+    <div style="background: white; border-radius: 20px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 25px;">
+                <label for="{{ form.username.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 10px; color: #374151; font-size: 16px;">
+                    Your Username
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.username.errors|striptags }}</p>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <label for="{{ form.pin.id_for_label }}" style="display: block; font-weight: 600; margin-bottom: 10px; color: #374151; font-size: 16px;">
+                    Your PIN
+                </label>
+                {{ form.pin }}
+                {% if form.pin.errors %}
+                    <p style="color: #dc2626; font-size: 14px; margin-top: 5px;">{{ form.pin.errors|striptags }}</p>
+                {% endif %}
+                <p style="color: #9ca3af; font-size: 13px; margin-top: 5px;">
+                    🔒 This is your secret 4-digit code
+                </p>
+            </div>
+
+            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border: none; border-radius: 12px; font-size: 18px; font-weight: 700; cursor: pointer; transition: transform 0.2s;">
+                Let's Go! 🚀
+            </button>
+        </form>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f3f4f6; border-radius: 12px;">
+        <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+            <strong>Forgot your PIN?</strong>
+        </p>
+        <p style="margin: 0; color: #9ca3af; font-size: 13px;">
+            Ask your parent to reset it from their dashboard!
+        </p>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="{% url 'account_login' %}" style="color: #667eea; text-decoration: none; font-size: 14px;">
+            Are you a parent? Click here to login
+        </a>
+    </div>
+</div>
+
+<style>
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 14px 16px;
+        border: 3px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 18px;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+    
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    button[type="submit"]:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}

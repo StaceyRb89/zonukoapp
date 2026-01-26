@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if child.age_range == 'IMAGINAUTS' %}Let's Find Your Learning Style! 🌟{% elif child.age_range == 'NAVIGATORS' %}Discover Your Learning Style{% else %}Learning Style Assessment{% endif %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                font-family: 'Comic Sans MS', 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                font-family: 'Arial', 'Helvetica', sans-serif;
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            {% else %}
+                font-family: 'Segoe UI', 'Helvetica', sans-serif;
+                background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            {% endif %}
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .quiz-container {
+            max-width: {% if child.age_range == 'IMAGINAUTS' %}700px{% else %}800px{% endif %};
+            margin: 0 auto;
+            background: white;
+            border-radius: {% if child.age_range == 'IMAGINAUTS' %}30px{% else %}20px{% endif %};
+            padding: {% if child.age_range == 'IMAGINAUTS' %}40px{% else %}50px{% endif %};
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                color: #667eea;
+                text-align: center;
+                font-size: 2.5em;
+            {% elif child.age_range == 'NAVIGATORS' %}
+                color: #0066cc;
+                text-align: center;
+                font-size: 2.3em;
+            {% else %}
+                color: #2c5364;
+                font-size: 2em;
+                font-weight: 600;
+            {% endif %}
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}1.2em{% else %}1.1em{% endif %};
+            margin-bottom: 40px;
+        }
+        
+        .question {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                border-radius: 20px;
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+                border-radius: 15px;
+            {% else %}
+                background: linear-gradient(135deg, #434343 0%, #000000 100%);
+                border-radius: 10px;
+            {% endif %}
+            padding: 30px;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .question h3 {
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}1.5em{% elif child.age_range == 'NAVIGATORS' %}1.4em{% else %}1.3em{% endif %};
+            margin-bottom: 20px;
+            font-weight: {% if child.age_range == 'TRAILBLAZERS' %}500{% else %}bold{% endif %};
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .option {
+            background: white;
+            border: 3px solid transparent;
+            border-radius: {% if child.age_range == 'IMAGINAUTS' %}15px{% else %}10px{% endif %};
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .option input[type="radio"] {
+            display: none;
+        }
+        
+        .option input[type="radio"]:checked + label {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            {% else %}
+                background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+            {% endif %}
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .option label {
+            cursor: pointer;
+            display: block;
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}1.1em{% else %}1em{% endif %};
+            color: #333;
+            font-weight: {% if child.age_range == 'IMAGINAUTS' %}bold{% else %}600{% endif %};
+        }
+        
+        .emoji {
+            font-size: {% if child.age_range == 'IMAGINAUTS' %}3em{% elif child.age_range == 'NAVIGATORS' %}2.5em{% else %}2em{% endif %};
+            display: {% if child.age_range == 'TRAILBLAZERS' %}inline{% else %}block{% endif %};
+            margin-bottom: {% if child.age_range == 'TRAILBLAZERS' %}0{% else %}10px{% endif %};
+            margin-right: {% if child.age_range == 'TRAILBLAZERS' %}10px{% else %}0{% endif %};
+        }
+        
+        .submit-btn {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                border-radius: 50px;
+                box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+                border-radius: 25px;
+                box-shadow: 0 10px 30px rgba(53, 209, 220, 0.4);
+            {% else %}
+                background: linear-gradient(135deg, #434343 0%, #000000 100%);
+                border-radius: 8px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            {% endif %}
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 0;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            {% if child.age_range == 'IMAGINAUTS' %}
+                box-shadow: 0 15px 40px rgba(245, 87, 108, 0.6);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                box-shadow: 0 15px 40px rgba(53, 209, 220, 0.6);
+            {% else %}
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            {% endif %}
+        }
+        
+        .progress {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            {% if child.age_range == 'IMAGINAUTS' %}
+                background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            {% elif child.age_range == 'NAVIGATORS' %}
+                background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            {% else %}
+                background: linear-gradient(90deg, #0f2027 0%, #2c5364 100%);
+            {% endif %}
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>{% if child.age_range == 'IMAGINAUTS' %}🌟 Discover Your Learning Style! 🌟{% elif child.age_range == 'NAVIGATORS' %}Discover Your Learning Style{% else %}Learning Style Assessment{% endif %}</h1>
+        <p class="subtitle">{% if child.age_range == 'IMAGINAUTS' %}Answer these fun questions, {{ child.username }}!{% elif child.age_range == 'NAVIGATORS' %}Let's find out what type of learner you are, {{ child.username }}{% else %}Complete this assessment to identify your learning preferences, {{ child.username }}{% endif %}</p>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <form method="post" id="quizForm">
+            {% csrf_token %}
+            
+            {% if child.age_range == 'IMAGINAUTS' %}
+                <!-- Imaginauts (6-10): Simple, fun questions -->
+                <div class="question">
+                    <h3>1️⃣ What do you like doing more?</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1" value="build" id="q1_build" required>
+                            <label for="q1_build">
+                                <span class="emoji">🔨</span>
+                                Building Things
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1" value="draw" id="q1_draw">
+                            <label for="q1_draw">
+                                <span class="emoji">🎨</span>
+                                Drawing & Art
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>2️⃣ Which sounds more exciting?</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2" value="experiment" id="q2_exp" required>
+                            <label for="q2_exp">
+                                <span class="emoji">🔬</span>
+                                Cool Experiments
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2" value="puzzle" id="q2_puzzle">
+                            <label for="q2_puzzle">
+                                <span class="emoji">🧩</span>
+                                Solving Puzzles
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>3️⃣ Pick your favorite!</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q3" value="robot" id="q3_robot" required>
+                            <label for="q3_robot">
+                                <span class="emoji">🤖</span>
+                                Robots & Tech
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3" value="painting" id="q3_paint">
+                            <label for="q3_paint">
+                                <span class="emoji">🖼️</span>
+                                Painting & Music
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>4️⃣ What makes you curious?</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q4" value="how" id="q4_how" required>
+                            <label for="q4_how">
+                                <span class="emoji">⚙️</span>
+                                How Things Work
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4" value="create" id="q4_create">
+                            <label for="q4_create">
+                                <span class="emoji">✨</span>
+                                Creating New Things
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>5️⃣ Which do you enjoy more?</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5" value="numbers" id="q5_num" required>
+                            <label for="q5_num">
+                                <span class="emoji">🔢</span>
+                                Playing with Numbers
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5" value="colors" id="q5_colors">
+                            <label for="q5_colors">
+                                <span class="emoji">🌈</span>
+                                Playing with Colors
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            
+            {% elif child.age_range == 'NAVIGATORS' %}
+                <!-- Navigators (11-13): More sophisticated questions -->
+                <div class="question">
+                    <h3>Question 1 of 5</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.9;">I prefer spending my free time...</p>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1" value="machine" id="q1_machine" required>
+                            <label for="q1_machine">
+                                <span class="emoji">⚙️</span>
+                                Building machines or inventions
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1" value="design" id="q1_design">
+                            <label for="q1_design">
+                                <span class="emoji">🎨</span>
+                                Creating art or music
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>Question 2 of 5</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.9;">I'm most interested in...</p>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2" value="lab" id="q2_lab" required>
+                            <label for="q2_lab">
+                                <span class="emoji">🔬</span>
+                                Conducting science experiments
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2" value="logic" id="q2_logic">
+                            <label for="q2_logic">
+                                <span class="emoji">🧮</span>
+                                Solving logic and math problems
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>Question 3 of 5</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.9;">My ideal project would involve...</p>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q3" value="code" id="q3_code" required>
+                            <label for="q3_code">
+                                <span class="emoji">💻</span>
+                                Programming and coding
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3" value="visual" id="q3_visual">
+                            <label for="q3_visual">
+                                <span class="emoji">🎭</span>
+                                Visual design or performance
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>Question 4 of 5</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.9;">I learn best by...</p>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q4" value="why" id="q4_why" required>
+                            <label for="q4_why">
+                                <span class="emoji">🔍</span>
+                                Understanding why things work
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4" value="express" id="q4_express">
+                            <label for="q4_express">
+                                <span class="emoji">🌟</span>
+                                Expressing myself creatively
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>Question 5 of 5</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.9;">I'm naturally drawn to...</p>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5" value="patterns" id="q5_patterns" required>
+                            <label for="q5_patterns">
+                                <span class="emoji">📊</span>
+                                Analyzing patterns and data
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5" value="aesthetics" id="q5_aesthetics">
+                            <label for="q5_aesthetics">
+                                <span class="emoji">✨</span>
+                                Beautiful designs and aesthetics
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            
+            {% else %}
+                <!-- Trailblazers (14-16): Advanced, mature questions -->
+                <div class="question">
+                    <h3>1. When approaching a complex challenge, I prefer to...</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q1" value="algorithm" id="q1_algo" required>
+                            <label for="q1_algo">
+                                <span class="emoji">🧠</span>
+                                Develop systematic solutions and algorithms
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q1" value="creative" id="q1_creative">
+                            <label for="q1_creative">
+                                <span class="emoji">💡</span>
+                                Explore creative and unconventional approaches
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>2. My ideal career would involve...</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q2" value="research" id="q2_research" required>
+                            <label for="q2_research">
+                                <span class="emoji">🔬</span>
+                                Scientific research and experimentation
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q2" value="analytical" id="q2_analytical">
+                            <label for="q2_analytical">
+                                <span class="emoji">📐</span>
+                                Mathematical modeling and analysis
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>3. I'm most fascinated by...</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q3" value="ai" id="q3_ai" required>
+                            <label for="q3_ai">
+                                <span class="emoji">🤖</span>
+                                AI, robotics, and emerging technologies
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q3" value="digital" id="q3_digital">
+                            <label for="q3_digital">
+                                <span class="emoji">🎨</span>
+                                Digital arts and multimedia creation
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>4. I find the most satisfaction in...</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q4" value="analyze" id="q4_analyze" required>
+                            <label for="q4_analyze">
+                                <span class="emoji">📊</span>
+                                Analyzing complex systems and mechanisms
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q4" value="innovate" id="q4_innovate">
+                            <label for="q4_innovate">
+                                <span class="emoji">🎯</span>
+                                Innovating through artistic expression
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question">
+                    <h3>5. My strongest skills lie in...</h3>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" name="q5" value="data" id="q5_data" required>
+                            <label for="q5_data">
+                                <span class="emoji">📈</span>
+                                Data interpretation and quantitative reasoning
+                            </label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" name="q5" value="visual" id="q5_visual">
+                            <label for="q5_visual">
+                                <span class="emoji">🖼️</span>
+                                Visual communication and design thinking
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <button type="submit" class="submit-btn">{% if child.age_range == 'IMAGINAUTS' %}See My Results! 🎉{% elif child.age_range == 'NAVIGATORS' %}View My Results{% else %}Complete Assessment{% endif %}</button>
+        </form>
+    </div>
+    
+    <script>
+        // Update progress bar as questions are answered
+        const form = document.getElementById('quizForm');
+        const progressBar = document.getElementById('progressBar');
+        const totalQuestions = 5;
+        
+        form.addEventListener('change', function() {
+            const answered = new Set();
+            for(let i = 1; i <= totalQuestions; i++) {
+                const question = document.querySelector(`input[name="q${i}"]:checked`);
+                if(question) {
+                    answered.add(i);
+                }
+            }
+            const progress = (answered.size / totalQuestions) * 100;
+            progressBar.style.width = progress + '%';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,290 @@
+/* Zonuko Admin Custom Styling - Purple Gradient Theme */
+
+/* Main header gradient matching your site */
+.navbar-purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Sidebar gradient */
+.sidebar-dark-purple {
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Brand name styling */
+.brand-link {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+/* Button styling */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Card headers */
+.card-header {
+    background: linear-gradient(135deg, #f0f2ff 0%, #faf0ff 100%);
+    border-bottom: 2px solid #667eea;
+}
+
+/* Form field focus */
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Submit row */
+.submit-row {
+    background: linear-gradient(135deg, #f0f2ff 0%, #faf0ff 100%);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Links */
+a {
+    color: #667eea;
+}
+
+a:hover {
+    color: #764ba2;
+}
+
+/* Table striping */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(102, 126, 234, 0.05);
+}
+
+/* Active menu items */
+.nav-sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600;
+}
+
+/* Custom file upload styling */
+.custom-file-label::after {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Success messages */
+.alert-success {
+    background-color: #d4edda;
+    border-color: #667eea;
+    color: #155724;
+}
+
+/* Info boxes */
+.info-box {
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.info-box-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+/* Welcome card */
+.card.card-primary {
+    border-top: 3px solid #667eea;
+}
+
+/* Improve spacing and readability */
+.content-wrapper {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Django admin specific overrides */
+.module h2, .module caption, .inline-group h2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Delete button */
+.button.deletelink, .deletelink-box a {
+    background: #dc3545;
+}
+
+.button.deletelink:hover {
+    background: #c82333;
+}
+/* ===== PHASE 2: ENHANCED ADMIN STYLING ===== */
+
+/* File upload fields - make them look nicer */
+input[type="file"] {
+    padding: 10px;
+    border: 2px dashed #667eea;
+    border-radius: 8px;
+    background: rgba(102, 126, 234, 0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+input[type="file"]:hover {
+    border-color: #764ba2;
+    background: rgba(118, 75, 162, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Help text styling */
+.help {
+    color: #667eea;
+    font-size: 0.9em;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Fieldset styling with emoji */
+.fieldset h2 {
+    font-size: 1.2em;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+/* TinyMCE wrapper styling */
+.mce-tinymce {
+    border: 2px solid #667eea !important;
+    border-radius: 8px !important;
+}
+
+/* Make textareas match the purple theme */
+textarea {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Select2 dropdown (for tags, categories, etc) */
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #667eea !important;
+}
+
+/* Add emoji button for title field */
+.emoji-picker-btn {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2em;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.emoji-picker-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Emoji picker popup */
+.emoji-picker-popup {
+    position: absolute;
+    background: white;
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: none;
+    max-width: 300px;
+}
+
+.emoji-picker-popup.show {
+    display: block;
+}
+
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.emoji-item {
+    font-size: 1.8em;
+    cursor: pointer;
+    padding: 8px;
+    text-align: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.emoji-item:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: scale(1.2);
+}
+
+/* Video/PDF file status indicators */
+.file-status {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 4px 10px;
+    background: #28a745;
+    color: white;
+    border-radius: 20px;
+    font-size: 0.85em;
+}
+
+/* Make the admin look more modern */
+.form-row {
+    margin-bottom: 20px;
+}
+
+.form-row label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Collapse sections styling */
+.collapse .form-row {
+    background: rgba(102, 126, 234, 0.03);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}

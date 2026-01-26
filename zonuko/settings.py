@@ -42,6 +42,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
+    "jazzmin",  # Must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -53,6 +54,8 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
+    "storages",
+    "tinymce",
     "allauth.socialaccount.providers.google",
     # Local apps
     "apps.core",
@@ -168,3 +171,114 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Zonuko] "
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+
+# Digital Ocean Spaces Configuration
+AWS_ACCESS_KEY_ID = os.environ.get("SPACES_ACCESS_KEY", "")
+AWS_SECRET_ACCESS_KEY = os.environ.get("SPACES_SECRET_KEY", "")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("SPACES_BUCKET_NAME", "zonuko-media")
+AWS_S3_ENDPOINT_URL = os.environ.get("SPACES_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": "max-age=86400",
+}
+AWS_LOCATION = "media"
+AWS_DEFAULT_ACL = "public-read"
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.nyc3.digitaloceanspaces.com"
+
+# Jazzmin Admin Theme Configuration
+JAZZMIN_SETTINGS = {
+    "site_title": "Zonuko Admin",
+    "site_header": "Zonuko",
+    "site_brand": "🚀 Zonuko Learning",
+    "welcome_sign": "Welcome to Zonuko Content Manager",
+    "copyright": "Zonuko Learning Adventures",
+    "search_model": ["users.Project", "users.ChildProfile"],
+    
+    # Top Menu
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "/", "new_window": True},
+        {"name": "Projects", "url": "admin:users_project_changelist", "permissions": ["users.view_project"]},
+    ],
+    
+    # User Menu
+    "usermenu_links": [
+        {"model": "auth.user"}
+    ],
+    
+    # Side Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    
+    # UI Tweaks - Your Purple Gradient!
+    "custom_css": "css/admin_custom.css",
+    "custom_js": "js/admin_enhancements.js",
+    
+    # Icons
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "users.ParentProfile": "fas fa-user-circle",
+        "users.ChildProfile": "fas fa-child",
+        "users.Project": "fas fa-rocket",
+        "users.ProjectProgress": "fas fa-tasks",
+        "users.Subscription": "fas fa-credit-card",
+    },
+    
+    # Color scheme
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-purple",
+    "accent": "accent-primary",
+    "navbar": "navbar-purple navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-purple",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": True,
+    "theme": "flatly",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
+# TinyMCE Configuration
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 400,
+    "width": "100%",
+    "menubar": False,
+    "plugins": "link lists emoticons code preview fullscreen",
+    "toolbar": "undo redo | formatselect | bold italic underline | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | link emoticons | code preview fullscreen",
+    "toolbar_mode": "sliding",
+    "content_style": "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; }",
+    "elementpath": False,
+    "branding": False,
+    "promotion": False,
+}
+
