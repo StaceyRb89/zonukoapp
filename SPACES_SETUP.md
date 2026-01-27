@@ -40,7 +40,7 @@ SPACES_ENDPOINT=https://nyc3.digitaloceanspaces.com
 ## Step 4: Test It!
 
 1. Restart your Django server
-2. Go to admin: http://127.0.0.1:8000/admin/
+2. Go to admin: http://127.0.0.1:8000/creator/
 3. Click "Projects" → "Add Project"
 4. Upload a small test video
 5. Save

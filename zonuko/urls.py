@@ -9,7 +9,7 @@ urlpatterns = [
     path("founding/", include("apps.founding.urls")),
     path("accounts/", include("allauth.urls")),
     path("members/", include("apps.users.urls")),
-    path("admin/", admin.site.urls),
+    path("creator/", admin.site.urls),
     path("tinymce/", include("tinymce.urls")),
 ]
 
