@@ -17,9 +17,9 @@ class FoundingFamilySignupView(FormView):
     form_class = FoundingFamilySignupForm
     success_url = reverse_lazy("founding:thanks")
     
-    # Set the limit for founding family signups (you can reserve some spots)
+    # Set the limit for founding family signups
     FOUNDING_LIMIT = 200
-    RESERVED_SPOTS = 10  # Keep 10 spots for troubleshooting/VIPs
+    RESERVED_SPOTS = 0  # No reserved spots - when they're gone, they're gone!
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
