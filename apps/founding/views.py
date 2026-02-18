@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import FormView, TemplateView
 
-from .forms import FoundingFamilySignupForm
+from .forms import FoundingFamilySignupForm, ChildFormSet
 from .models import FoundingFamilySignup
 
 
@@ -32,19 +32,44 @@ class FoundingFamilySignupView(FormView):
         context['signups_closed'] = total_signups >= available_limit
         context['progress_percentage'] = min(100, int((total_signups / available_limit) * 100))
         
+        # Add formset to context
+        if 'child_formset' not in context:
+            context['child_formset'] = ChildFormSet()
+        
         return context
 
-    def form_valid(self, form):
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        child_formset = ChildFormSet(request.POST)
+        
+        if form.is_valid() and child_formset.is_valid():
+            return self.form_valid(form, child_formset)
+        else:
+            return self.form_invalid(form, child_formset)
+
+    def form_valid(self, form, child_formset):
         # Check if limit reached before saving
         total_signups = FoundingFamilySignup.objects.count()
         available_limit = self.FOUNDING_LIMIT - self.RESERVED_SPOTS
         
         if total_signups >= available_limit:
             form.add_error(None, "Sorry, all founding family spots have been claimed!")
-            return self.form_invalid(form)
+            return self.form_invalid(form, child_formset)
         
-        form.save()
+        # Save the main form
+        self.object = form.save()
+        
+        # Save the children formset
+        child_formset.instance = self.object
+        child_formset.save()
+        
         return super().form_valid(form)
+    
+    def form_invalid(self, form, child_formset=None):
+        context = self.get_context_data(form=form)
+        if child_formset:
+            context['child_formset'] = child_formset
+        return self.render_to_response(context)
 
 
 class FoundingFamilyThanksView(TemplateView):

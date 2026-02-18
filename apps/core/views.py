@@ -1,9 +1,20 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from apps.founding.models import FoundingFamilySignup
 
 
 def home(request):
-    return render(request, "core/home.html")
+    # Get founding family signup stats
+    total_signups = FoundingFamilySignup.objects.count()
+    founding_limit = 200
+    spots_remaining = max(0, founding_limit - total_signups)
+    
+    context = {
+        'total_signups': total_signups,
+        'founding_limit': founding_limit,
+        'spots_remaining': spots_remaining,
+    }
+    return render(request, "core/home.html", context)
 
 
 def about(request):

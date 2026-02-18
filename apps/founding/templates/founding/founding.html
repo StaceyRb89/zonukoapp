@@ -61,8 +61,7 @@
                 {% else %}
                     <p class="help-text">Tell us a little about your family so we can invite you first.</p>
                 {% endif %}
-                <p class="help-text">Tell us a little about your family so we can invite you first.</p>
-                <form method="post" class="form-grid">
+                <form method="post" class="form-grid" id="founding-form">
                     {% csrf_token %}
                     {% if form.non_field_errors %}
                         <p class="form-error">{{ form.non_field_errors|striptags }}</p>
@@ -88,6 +87,37 @@
                             <p class="form-error">{{ form.child_age_range.errors|striptags }}</p>
                         {% endif %}
                     </div>
+                    
+                    <!-- Additional Children Section -->
+                    <div id="additional-children" style="margin-top: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; font-size: 1.1rem;">Additional Children (optional)</h3>
+                            <button type="button" id="add-child" class="button" style="padding: 0.3rem 1rem; font-size: 0.9rem;">
+                                + Add Another Child
+                            </button>
+                        </div>
+                        
+                        {{ child_formset.management_form }}
+                        <div id="child-forms-container">
+                            {% for child_form in child_formset %}
+                                <div class="child-form-item" style="background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; position: relative; display: none;">
+                                    <button type="button" class="remove-child" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #ef4444; color: white; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer; font-size: 0.8rem;">✕</button>
+                                    {% for hidden in child_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    <div class="form-field">
+                                        {{ child_form.age_range.label_tag }}
+                                        {{ child_form.age_range }}
+                                        {% if child_form.age_range.errors %}
+                                            <p class="form-error">{{ child_form.age_range.errors|striptags }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <p class="help-text" style="font-size: 0.85rem; margin-top: 0.5rem;">You can add up to 5 additional children.</p>
+                    </div>
+                    
                     <div class="form-field">
                         {{ form.excited_for.label_tag }}
                         {{ form.excited_for }}
@@ -106,4 +136,85 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addChildBtn = document.getElementById('add-child');
+    const container = document.getElementById('child-forms-container');
+    const totalForms = document.querySelector('input[name="children-TOTAL_FORMS"]');
+    const maxForms = parseInt(document.querySelector('input[name="children-MAX_NUM_FORMS"]').value);
+    let formCount = 0;
+    
+    // Get all child form items
+    const childForms = container.querySelectorAll('.child-form-item');
+    
+    // Function to update form visibility and button state
+    function updateFormState() {
+        const visibleForms = container.querySelectorAll('.child-form-item:not([style*="display: none"])');
+        formCount = visibleForms.length;
+        
+        // Update button state
+        if (formCount >= maxForms) {
+            addChildBtn.disabled = true;
+            addChildBtn.textContent = `Maximum ${maxForms} additional children`;
+        } else {
+            addChildBtn.disabled = false;
+            addChildBtn.textContent = '+ Add Another Child';
+        }
+        
+        // Update total forms
+        totalForms.value = formCount;
+    }
+    
+    // Add child form
+    addChildBtn.addEventListener('click', function() {
+        if (formCount >= maxForms) return;
+        
+        // Find the first hidden form
+        const hiddenForms = Array.from(childForms).filter(form => 
+            form.style.display === 'none' || form.style.display === ''
+        );
+        
+        if (hiddenForms.length > 0) {
+            const formToShow = hiddenForms[0];
+            formToShow.style.display = 'block';
+            
+            // Clear the DELETE checkbox if it exists
+            const deleteCheckbox = formToShow.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = false;
+            }
+            
+            updateFormState();
+        }
+    });
+    
+    // Remove child form
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-child')) {
+            const formItem = e.target.closest('.child-form-item');
+            
+            // Check the DELETE checkbox
+            const deleteCheckbox = formItem.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+            }
+            
+            // Hide the form
+            formItem.style.display = 'none';
+            
+            // Clear the form values
+            const select = formItem.querySelector('select');
+            if (select) {
+                select.value = '';
+            }
+            
+            updateFormState();
+        }
+    });
+    
+    // Initialize
+    updateFormState();
+});
+</script>
 {% endblock %}
