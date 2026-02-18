@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.views.decorators.cache import never_cache
 from apps.founding.models import FoundingFamilySignup
 
 
+@never_cache
 def home(request):
     # Get founding family signup stats
     total_signups = FoundingFamilySignup.objects.count()
