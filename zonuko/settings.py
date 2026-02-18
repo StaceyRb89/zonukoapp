@@ -161,10 +161,20 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 LOGIN_REDIRECT_URL = "/members/dashboard/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
-# Email settings (for development - console backend)
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "Zonuko Team <support@zonuko.co.uk>"
-SERVER_EMAIL = "support@zonuko.co.uk"
+# Email settings
+if os.environ.get("EMAIL_HOST"):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.environ.get("EMAIL_HOST")
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+    EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+else:
+    # Development - console backend
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Zonuko Team <support@zonuko.co.uk>")
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "support@zonuko.co.uk")
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[Zonuko] "
 
 # Stripe settings
