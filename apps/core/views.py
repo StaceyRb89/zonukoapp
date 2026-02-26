@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import cache_control
 from apps.founding.models import FoundingFamilySignup
 
 
 @never_cache
+@cache_control(no_cache=True, no_store=True, must_revalidate=True, max_age=0)
 def home(request):
     # Get founding family signup stats
     total_signups = FoundingFamilySignup.objects.count()

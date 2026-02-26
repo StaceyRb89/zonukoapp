@@ -32,11 +32,9 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() or [
     "178.62.107.167",
     "zonuko.co.uk",
     "www.zonuko.co.uk",
-    "zonuko.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://zonuko.onrender.com",
     "https://zonuko.co.uk",
     "https://www.zonuko.co.uk",
 ]
