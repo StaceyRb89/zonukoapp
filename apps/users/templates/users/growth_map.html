@@ -1,0 +1,399 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Growth Map - {{ child.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .growth-map-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .stage-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        color: white;
+    }
+    
+    .stage-emoji {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stage-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stage-identity {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        opacity: 0.95;
+    }
+    
+    .unlocks-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .unlocks-title {
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .unlocks-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+        text-align: left;
+    }
+    
+    .unlock-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.6rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    
+    /* Growth Pathways */
+    .pathways-container {
+        display: grid;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .pathway-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .pathway-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    }
+    
+    .pathway-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+    
+    .pathway-title {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    
+    .pathway-emoji {
+        font-size: 1.8rem;
+    }
+    
+    .pathway-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .pathway-level {
+        background: #f0f0f0;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    /* Progress Bar - Organic Growth Visualization */
+    .progress-container {
+        margin-bottom: 1.5rem;
+    }
+    
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+    
+    .progress-bar-wrapper {
+        background: #f5f5f5;
+        border-radius: 20px;
+        height: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        height: 100%;
+        transition: width 0.4s ease;
+        border-radius: 20px;
+    }
+    
+    /* Organic vine visualization */
+    .growth-vine {
+        position: relative;
+        height: 40px;
+        margin: 2rem 0;
+        overflow: hidden;
+    }
+    
+    .vine-segment {
+        position: absolute;
+        height: 8px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 4px;
+        transition: width 0.4s ease;
+    }
+    
+    /* Stats */
+    .pathway-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .stat {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #999;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    /* Overall Growth Summary */
+    .growth-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+    
+    .summary-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-pathways {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .summary-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .summary-item-emoji {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-item-name {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.95;
+    }
+    
+    .summary-item-level {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    
+    /* Message */
+    .growth-message {
+        background: #f0f9ff;
+        border-left: 4px solid #667eea;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+        color: #333;
+    }
+    
+    .message-icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .growth-map-container {
+            padding: 1rem;
+        }
+        
+        .stage-header {
+            padding: 1.5rem;
+        }
+        
+        .stage-title {
+            font-size: 1.5rem;
+        }
+        
+        .summary-pathways {
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+        
+        .unlocks-list {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="growth-map-container">
+    <!-- Page Title -->
+    <div class="page-header" style="margin-bottom: 3rem;">
+        <h1>🗺️ My Growth Map</h1>
+        <p>See how you're growing as a builder and creator</p>
+    </div>
+    
+    <!-- Growth Message -->
+    <div class="growth-message">
+        <span class="message-icon">✨</span>
+        <strong>Growth instead of points:</strong> You're building real skills. Your growth map shows how you're developing creativity, problem-solving, and mastery.
+    </div>
+    
+    <!-- Current Stage Header -->
+    {% if progression_stage and stage_info %}
+    <div class="stage-header">
+        <div class="stage-emoji">{{ stage_info.emoji }}</div>
+        <div class="stage-title">{{ stage_info.name }}</div>
+        <div class="stage-identity">{{ stage_info.identity }}</div>
+        
+        {% if stage_info.unlocks %}
+        <div class="unlocks-section">
+            <div class="unlocks-title">🔓 You've Unlocked</div>
+            <div class="unlocks-list">
+                {% for unlock in stage_info.unlocks %}
+                <div class="unlock-item">{{ unlock }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Overall Summary -->
+    <div class="growth-summary">
+        <div class="summary-title">Your Growth at a Glance</div>
+        <div class="summary-pathways">
+            {% for pathway in growth_pathways %}
+            <div class="summary-item">
+                <div class="summary-item-emoji">{{ pathway.emoji }}</div>
+                <div class="summary-item-name">{{ pathway.name }}</div>
+                <div class="summary-item-level">Lvl {{ pathway.level }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <p style="font-size: 0.9rem; opacity: 0.9; margin: 0;">Complete projects, reflect deeply, and keep growing! 🌱</p>
+    </div>
+    
+    <!-- Individual Pathway Cards -->
+    <h2 style="margin-bottom: 2rem; color: #333;">📊 Detailed Growth Pathways</h2>
+    <div class="pathways-container">
+        {% for pathway in growth_pathways %}
+        <div class="pathway-card">
+            <div class="pathway-header">
+                <div class="pathway-title">
+                    <span class="pathway-emoji">{{ pathway.emoji }}</span>
+                    <span class="pathway-name">{{ pathway.name }}</span>
+                </div>
+                <div class="pathway-level">Level {{ pathway.level }}</div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Progress to Next Level</span>
+                    <span>{{ pathway.progress }}%</span>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" style="width: {{ pathway.progress }}%;"></div>
+                </div>
+            </div>
+            
+            <!-- Organic Growth Vine -->
+            <div class="growth-vine">
+                <div class="vine-segment" style="width: {% widthratio pathway.level 8 100 %}%;"></div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="pathway-stats">
+                <div class="stat">
+                    <div class="stat-label">Points Earned</div>
+                    <div class="stat-value">{{ pathway.points }}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Current Level</div>
+                    <div class="stat-value">{{ pathway.level }}/8</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Navigation -->
+    <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+        <a href="{% url 'users:child_dashboard' %}" class="btn btn-primary">
+            ← Back to Dashboard
+        </a>
+        <a href="{% url 'users:progression_detail' %}" class="btn btn-secondary" style="margin-left: 1rem;">
+            Learn More About Stages →
+        </a>
+    </div>
+</div>
+
+<script>
+    // Optional: Add animation on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.pathway-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 50);
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

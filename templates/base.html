@@ -6,14 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Zonuko{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <div class="page">
+        {% block navigation %}
         {% include 'partials/nav.html' %}
+        {% endblock %}
         <main class="main">
             {% block content %}{% endblock %}
         </main>
+        {% block footer %}
         {% include 'partials/footer.html' %}
+        {% endblock %}
     </div>
 </body>
 </html>

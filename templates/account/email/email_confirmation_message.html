@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verify your email</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f5f7fb; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fb; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px; background:#ffffff; border-radius:16px; box-shadow:0 12px 30px rgba(15, 23, 42, 0.08); overflow:hidden;">
+            <tr>
+              <td style="padding:28px 32px 8px 32px; text-align:center;">
+                <div style="font-weight:700; font-size:20px; color:#2563eb;">Zonuko</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 32px 0 32px; text-align:center;">
+                <h1 style="margin:0; font-size:24px;">Email Verification</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 32px 0 32px; text-align:center; color:#475569; font-size:15px; line-height:1.5;">
+                Welcome{% if user.first_name %} {{ user.first_name }}{% endif %}! Please verify your email address to complete your registration.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 32px 0 32px; text-align:center;">
+                <a href="{{ activate_url }}" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:600;">Verify Email</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px 0 32px; text-align:center; color:#64748b; font-size:13px;">
+                This link will expire in 3 days. If you didn’t create this account, you can ignore this email.
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 32px; text-align:center; color:#94a3b8; font-size:12px;">
+                Built for curious kids and supportive families. © Zonuko
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

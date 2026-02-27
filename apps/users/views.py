@@ -5,13 +5,16 @@ from django.contrib import messages
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.utils import timezone
 from .models import ChildProfile, Subscription, Project, ProjectProgress
 from .forms import ChildProfileForm, ChildLoginForm
 from django.db.models import Q, Count
+from datetime import timedelta
 import stripe
 import json
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 
 @login_required
@@ -20,10 +23,159 @@ def dashboard(request):
     user = request.user
     parent_profile = getattr(user, 'parent_profile', None)
     children = parent_profile.children.all() if parent_profile else []
+
+    child_summaries = []
+    recent_reflections = []
+    attention_items = []
+    weekly_wins = {
+        'total_completed': 0,
+        'total_reflections': 0,
+        'top_skill_label': None,
+        'top_skill_points': 0,
+        'spotlight_child': None,
+        'spotlight_count': 0,
+    }
+
+    skill_labels = {
+        'creative_thinking': 'Creative Thinking',
+        'practical_making': 'Practical Making',
+        'problem_solving': 'Problem Solving',
+        'resilience': 'Resilience',
+    }
+
+    if children:
+        child_ids = [child.id for child in children]
+        progress_qs = ProjectProgress.objects.filter(child_id__in=child_ids).select_related('child', 'project')
+        progress_list = list(progress_qs)
+        week_ago = timezone.now() - timedelta(days=7)
+
+        weekly_completed = [
+            p for p in progress_list
+            if p.completed_at and p.completed_at >= week_ago and p.status == ProjectProgress.STATUS_COMPLETED
+        ]
+        weekly_reflections = [
+            p for p in progress_list
+            if p.reflection_at and p.reflection_at >= week_ago and p.reflection_text and p.reflection_text.strip()
+        ]
+
+        weekly_skill_totals = {key: 0 for key in skill_labels.keys()}
+        for progress in weekly_completed:
+            dimensions = progress.project.skill_dimensions or {}
+            for key in weekly_skill_totals.keys():
+                weekly_skill_totals[key] += int(dimensions.get(key, 0) or 0)
+
+        top_skill_key = None
+        top_skill_points = 0
+        if weekly_skill_totals:
+            top_skill_key, top_skill_points = max(weekly_skill_totals.items(), key=lambda x: x[1])
+            if top_skill_points == 0:
+                top_skill_key = None
+
+        weekly_child_counts = {}
+        for progress in weekly_completed:
+            weekly_child_counts[progress.child_id] = weekly_child_counts.get(progress.child_id, 0) + 1
+
+        spotlight_child = None
+        spotlight_count = 0
+        if weekly_child_counts:
+            spotlight_child_id, spotlight_count = max(weekly_child_counts.items(), key=lambda x: x[1])
+            spotlight_child = next((child for child in children if child.id == spotlight_child_id), None)
+
+        weekly_wins = {
+            'total_completed': len(weekly_completed),
+            'total_reflections': len(weekly_reflections),
+            'top_skill_label': skill_labels.get(top_skill_key) if top_skill_key else None,
+            'top_skill_points': top_skill_points,
+            'spotlight_child': spotlight_child,
+            'spotlight_count': spotlight_count,
+        }
+
+        progress_by_child = {}
+        for progress in progress_list:
+            progress_by_child.setdefault(progress.child_id, []).append(progress)
+
+        for child in children:
+            child_progress = progress_by_child.get(child.id, [])
+            completed_progress = [p for p in child_progress if p.status == ProjectProgress.STATUS_COMPLETED]
+            total_projects = len(child_progress)
+            completed_count = len(completed_progress)
+            in_progress_count = sum(1 for p in child_progress if p.status == ProjectProgress.STATUS_IN_PROGRESS)
+            needs_reflection_count = sum(
+                1 for p in child_progress
+                if p.status == ProjectProgress.STATUS_COMPLETED and not (p.reflection_text and p.reflection_text.strip())
+            )
+            needs_rating_count = sum(1 for p in child_progress if p.status == ProjectProgress.STATUS_COMPLETED and not p.rating)
+            completion_percent = int((completed_count / total_projects) * 100) if total_projects else 0
+
+            # Aggregate learned skills from completed projects
+            skill_totals = {key: 0 for key in skill_labels.keys()}
+            for progress in completed_progress:
+                dimensions = progress.project.skill_dimensions or {}
+                for key in skill_totals.keys():
+                    skill_totals[key] += int(dimensions.get(key, 0) or 0)
+
+            top_skills = [
+                {'key': key, 'label': skill_labels[key], 'score': score}
+                for key, score in sorted(skill_totals.items(), key=lambda x: x[1], reverse=True)
+                if score > 0
+            ][:3]
+
+            if completed_count >= 10:
+                praise_message = f"{child.username} is showing real maker confidence and consistency."
+            elif completed_count >= 5:
+                praise_message = f"{child.username} is building strong momentum and healthy learning habits."
+            elif completed_count >= 1:
+                praise_message = f"Great start — {child.username} is building curiosity through hands-on learning."
+            else:
+                praise_message = f"{child.username} is ready to begin their first project journey."
+
+            pathway_snapshot = [
+                ('Creative', min(max(getattr(child, 'creative_thinking', 0), 0), 100)),
+                ('Making', min(max(getattr(child, 'practical_making', 0), 0), 100)),
+                ('Problem Solving', min(max(getattr(child, 'problem_solving', 0), 0), 100)),
+                ('Resilience', min(max(getattr(child, 'resilience', 0), 0), 100)),
+            ]
+
+            child_summaries.append({
+                'child': child,
+                'total_projects': total_projects,
+                'completed_count': completed_count,
+                'in_progress_count': in_progress_count,
+                'needs_reflection_count': needs_reflection_count,
+                'needs_rating_count': needs_rating_count,
+                'completion_percent': completion_percent,
+                'top_skills': top_skills,
+                'praise_message': praise_message,
+                'pathway_snapshot': pathway_snapshot,
+            })
+
+            for progress in completed_progress:
+                if not (progress.reflection_text and progress.reflection_text.strip()):
+                    attention_items.append({
+                        'child_name': child.username,
+                        'project_title': progress.project.title,
+                        'action': 'Reflection needed',
+                    })
+                if not progress.rating:
+                    attention_items.append({
+                        'child_name': child.username,
+                        'project_title': progress.project.title,
+                        'action': 'Rating needed',
+                    })
+
+        recent_reflections = list(
+            progress_qs.exclude(reflection_text__isnull=True)
+            .exclude(reflection_text='')
+            .order_by('-reflection_at', '-completed_at')[:8]
+        )
     
     context = {
         "parent_profile": parent_profile,
         "children": children,
+        "child_summaries": child_summaries,
+        "recent_reflections": recent_reflections,
+        "attention_items": attention_items[:8],
+        "weekly_wins": weekly_wins,
         "has_subscription": parent_profile.has_active_subscription if parent_profile else False,
     }
     return render(request, "users/dashboard.html", context)
@@ -366,7 +518,13 @@ def child_login(request):
 
 
 def child_dashboard(request):
-    """Child dashboard - requires child login"""
+    """
+    Child dashboard - their world based on age_range.
+    
+    For Imaginauts (6-10): Adventure-focused dashboard
+    For Navigators (11-13): [Future - skill-focused]
+    For Trailblazers (14-16): [Future - challenge-focused]
+    """
     child_id = request.session.get('child_id')
     
     if not child_id:
@@ -383,8 +541,143 @@ def child_dashboard(request):
     if not child.quiz_completed:
         return redirect('users:child_quiz')
     
-    # Get personalized project recommendations
+    # Get progression stage
+    try:
+        stage = child.progression_stage
+    except AttributeError:
+        # Auto-initialize if needed
+        from apps.users.models import ProgressionStage
+        stage = ProgressionStage.objects.create(
+            child=child,
+            current_stage=ProgressionStage.EXPLORER
+        )
+
+    # Keep numeric progression stage in sync with actual completed/reflected work
+    # so next-stage projects unlock correctly.
+    completed_count = child.project_progress.filter(
+        Q(completed_at__isnull=False) | Q(status=ProjectProgress.STATUS_COMPLETED)
+    ).values('project_id').distinct().count()
+    reflection_count = child.project_progress.filter(
+        has_reflection=True,
+        reflection_text__isnull=False
+    ).exclude(reflection_text='').count()
+
+    from apps.users.models import ProgressionStage
+    if completed_count >= 25 and reflection_count >= 10:
+        calculated_stage_number = ProgressionStage.INDEPENDENT_MAKER
+    elif completed_count >= 15 and reflection_count >= 3:
+        calculated_stage_number = ProgressionStage.DESIGNER
+    elif completed_count >= 8:
+        calculated_stage_number = ProgressionStage.BUILDER
+    elif completed_count >= 3:
+        calculated_stage_number = ProgressionStage.EXPERIMENTER
+    else:
+        calculated_stage_number = ProgressionStage.EXPLORER
+
+    if stage.current_stage != calculated_stage_number:
+        stage.current_stage = calculated_stage_number
+        stage.save(update_fields=['current_stage', 'updated_at'])
+
+    # Keep legacy string stage fields aligned for growth pages that still use ChildProfile.current_stage
+    stage_name_map = {
+        ProgressionStage.EXPLORER: ChildProfile.EXPLORER,
+        ProgressionStage.EXPERIMENTER: ChildProfile.EXPERIMENTER,
+        ProgressionStage.BUILDER: ChildProfile.BUILDER,
+        ProgressionStage.DESIGNER: ChildProfile.DESIGNER,
+        ProgressionStage.INDEPENDENT_MAKER: ChildProfile.INDEPENDENT_MAKER,
+    }
+    target_child_stage = stage_name_map.get(calculated_stage_number, ChildProfile.EXPLORER)
+    if child.current_stage != target_child_stage or child.total_reflections != reflection_count:
+        child.current_stage = target_child_stage
+        child.total_reflections = reflection_count
+        child.save(update_fields=['current_stage', 'total_reflections', 'updated_at'])
+
+    current_stage_number = calculated_stage_number
+
+    # Dynamic countdown for next stage teaser copy
+    next_stage_requirements = {
+        1: {'projects': 3, 'reflections': 0, 'name': 'Experimenter'},
+        2: {'projects': 8, 'reflections': 0, 'name': 'Builder'},
+        3: {'projects': 15, 'reflections': 3, 'name': 'Designer'},
+        4: {'projects': 25, 'reflections': 10, 'name': 'Independent Maker'},
+    }
+    target = next_stage_requirements.get(current_stage_number)
+    remaining_projects_for_next_stage = max(0, (target['projects'] - completed_count)) if target else 0
+    remaining_reflections_for_next_stage = max(0, (target['reflections'] - reflection_count)) if target else 0
+    next_stage_name = target['name'] if target else 'Mastery'
+    
+    # Use query engine to get projects for this child
+    from apps.users.query_engine import ProjectQueryEngine
+    engine = ProjectQueryEngine(child)
+    available_projects = list(engine.get_available())  # Get ALL available projects (excludes HIDDEN)
+
+    # Get all progress for available projects (excludes progress on hidden/unavailable projects)
+    available_project_ids = [p.id for p in available_projects]
+    progress_lookup = {
+        progress.project_id: progress
+        for progress in child.project_progress.filter(project_id__in=available_project_ids).select_related('project')
+    }
+
+    # Attach progress to each available project
+    for project in available_projects:
+        project.progress = progress_lookup.get(project.id)
+
+    # Filter projects by their current status (only from available projects)
+    in_progress_projects = [
+        project for project in available_projects
+        if project.progress and project.progress.status == ProjectProgress.STATUS_IN_PROGRESS
+    ]
+    
+    # New projects = available but not started (no progress at all OR status is NOT_STARTED)
+    new_projects = [
+        project for project in available_projects
+        if not project.progress or project.progress.status == ProjectProgress.STATUS_NOT_STARTED
+    ]
+    
+    # Completed projects should come from all child's progress, not just available ones
+    # (child may have completed a project that's now above their stage due to stage changes)
+    # Include both: projects with completed_at timestamp OR status='completed'
+    completed_projects = child.project_progress.filter(
+        Q(completed_at__isnull=False) | Q(status=ProjectProgress.STATUS_COMPLETED)
+    ).select_related('project').order_by('-completed_at', '-reflection_at', '-started_at')
+    
+    # Base context for all age groups
+    context = {
+        'child': child,
+        'stage': stage,
+        'current_stage_number': current_stage_number,
+        'in_progress_projects': in_progress_projects,
+        'new_projects': new_projects,
+        'locked_teaser': engine.get_teasers(limit=2),
+        'coming_soon': engine.get_coming_soon(limit=1),
+        'completed_projects': completed_projects,
+        'completed_count': completed_count,
+        'reflection_count': reflection_count,
+        'remaining_projects_for_next_stage': remaining_projects_for_next_stage,
+        'remaining_reflections_for_next_stage': remaining_reflections_for_next_stage,
+        'next_stage_name': next_stage_name,
+        'all_stages': [
+            {'number': 1, 'name': 'Explorer', 'emoji': '🌟'},
+            {'number': 2, 'name': 'Experimenter', 'emoji': '🔬'},
+            {'number': 3, 'name': 'Builder', 'emoji': '🔧'},
+            {'number': 4, 'name': 'Designer', 'emoji': '🎨'},
+            {'number': 5, 'name': 'Maker', 'emoji': '⭐'},
+        ],
+    }
+    
+    # Render age-appropriate template
+    if child.age_range == ChildProfile.IMAGINAUTS:
+        return render(request, 'users/imaginauts_world.html', context)
+    elif child.age_range == ChildProfile.NAVIGATORS:
+        return render(request, 'users/navigators_world.html', context)
+    elif child.age_range == ChildProfile.TRAILBLAZERS:
+        return render(request, 'users/trailblazers_world.html', context)
+    
+    # Fallback to default dashboard
     recommended_projects = get_recommended_projects(child, limit=6)
+    context['recommended_projects'] = recommended_projects
+    return render(request, 'users/child_dashboard.html', context)
+
     
     context = {
         'child': child,
@@ -532,8 +825,8 @@ def reset_child_quiz(request, child_id):
 
 def get_recommended_projects(child, limit=6):
     """Get personalized project recommendations based on child's profile"""
-    # Get all published projects
-    all_projects = Project.objects.filter(is_published=True)
+    # Get all live projects
+    all_projects = Project.objects.filter(visibility=Project.VISIBILITY_LIVE)
     
     # Filter by age range in Python (SQLite doesn't support JSONField contains)
     projects = [p for p in all_projects if child.age_range in p.age_ranges]
@@ -584,7 +877,12 @@ def project_detail(request, project_id):
         return redirect('users:child_login')
     
     child = get_object_or_404(ChildProfile, id=child_id)
-    project = get_object_or_404(Project, id=project_id, is_published=True)
+    # Use visibility check instead of is_published
+    project = get_object_or_404(Project, id=project_id)
+    
+    # Check if project is actually accessible (live or scheduled+published)
+    if not project.is_live() and project.visibility != Project.VISIBILITY_COMING_SOON:
+        return redirect('users:child_dashboard')
     
     # Process video URL for embedding
     video_embed_url = None
@@ -623,8 +921,10 @@ def project_detail(request, project_id):
         
         elif action == 'complete' and progress.status == 'in_progress':
             progress.status = 'completed'
+            progress.completed_at = timezone.now()
             progress.save()
-            messages.success(request, f"Completed {project.title}! How would you rate it?")
+            
+            messages.success(request, f"✨ {project.title} marked as complete! Now take a moment to reflect on what you learned.")
         
         elif action == 'rate' and progress.status == 'completed':
             rating = request.POST.get('rating')
@@ -642,3 +942,235 @@ def project_detail(request, project_id):
         'video_embed_url': video_embed_url,
     }
     return render(request, 'users/project_detail.html', context)
+
+
+# ============================================================================
+# GROWTH MAP & PROGRESSION VIEWS
+# ============================================================================
+
+def get_child_from_session(request):
+    """Helper to get child from session"""
+    child_id = request.session.get('child_id')
+    if child_id:
+        from .models import ChildProfile
+        return get_object_or_404(ChildProfile, id=child_id)
+    return None
+
+
+@login_required
+def growth_map(request):
+    """Display child's visual growth map and skill pathways"""
+    child = get_child_from_session(request)
+    if not child:
+        return redirect('users:child_login')
+    
+    # Calculate pathway percentages (out of 100 max)
+    pathways = [
+        {
+            'id': 'creative_thinking',
+            'emoji': '🧠',
+            'name': 'Creative Thinking',
+            'value': child.creative_thinking,
+            'percentage': child.get_pathway_percentage(child.creative_thinking),
+            'description': 'New ideas and creative problem solving'
+        },
+        {
+            'id': 'practical_making',
+            'emoji': '🛠',
+            'name': 'Practical Making',
+            'value': child.practical_making,
+            'percentage': child.get_pathway_percentage(child.practical_making),
+            'description': 'Building and hands-on skills'
+        },
+        {
+            'id': 'problem_solving',
+            'emoji': '🔍',
+            'name': 'Problem Solving',
+            'value': child.problem_solving,
+            'percentage': child.get_pathway_percentage(child.problem_solving),
+            'description': 'Finding solutions and fixing challenges'
+        },
+        {
+            'id': 'resilience',
+            'emoji': '💪',
+            'name': 'Resilience',
+            'value': child.resilience,
+            'percentage': child.get_pathway_percentage(child.resilience),
+            'description': 'Learning from mistakes and trying again'
+        },
+    ]
+    
+    # Get stage info
+    stage_descriptions = {
+        'EXPLORER': {
+            'title': '🌱 Explorer',
+            'subtitle': '"I can follow a build"',
+            'description': 'You\'re learning the basics and gaining confidence!',
+        },
+        'EXPERIMENTER': {
+            'title': '🔍 Experimenter',
+            'subtitle': '"I can adapt and improve"',
+            'description': 'You\'re trying new things and making builds your own!',
+        },
+        'BUILDER': {
+            'title': '🧱 Builder',
+            'subtitle': '"I can strengthen and improve designs"',
+            'description': 'You\'re testing and improving your creations!',
+        },
+        'DESIGNER': {
+            'title': '🛠 Designer',
+            'subtitle': '"I can plan before building"',
+            'description': 'You\'re thinking ahead and designing with purpose!',
+        },
+        'INDEPENDENT_MAKER': {
+            'title': '🔥 Independent Maker',
+            'subtitle': '"I build with purpose"',
+            'description': 'You\'re creating your own projects and solving real problems!',
+        },
+    }
+    
+    current_stage_info = stage_descriptions.get(child.current_stage, stage_descriptions['EXPLORER'])
+    
+    # Get earned badges
+    badge_info = {
+        'deep_thinker': {'name': '🌟 Deep Thinker', 'desc': "You're thinking about your learning!"},
+        'thoughtful_builder': {'name': '💭 Thoughtful Builder', 'desc': 'Your reflections show real growth'},
+        'reflection_master': {'name': '🧠 Reflection Master', 'desc': 'You understand how you learn best'},
+        'resilience_builder': {'name': '💪 Resilience Builder', 'desc': "You learn from what doesn't work"},
+        'growth_mindset': {'name': '🎯 Growth Mindset', 'desc': 'You know learning comes from practice'},
+    }
+    
+    earned_badges = [badge_info[code] for code in child.badges_earned if code in badge_info]
+    
+    context = {
+        'child': child,
+        'pathways': pathways,
+        'stage_info': current_stage_info,
+        'earned_badges': earned_badges,
+        'projects_completed': child.get_projects_completed_count(),
+        'total_reflections': child.total_reflections,
+    }
+    
+    return render(request, 'users/growth_map.html', context)
+
+
+@login_required
+def growth_summary_api(request):
+    """API endpoint to get child's growth summary for dashboard"""
+    child = get_child_from_session(request)
+    if not child:
+        return JsonResponse({'error': 'Not logged in'}, status=401)
+    
+    from .models import ProgressionStage, GrowthPathway
+    
+    try:
+        progression_stage = ProgressionStage.objects.get(child=child)
+    except ProgressionStage.DoesNotExist:
+        progression_stage = ProgressionStage.objects.create(
+            child=child,
+            current_stage=ProgressionStage.EXPLORER
+        )
+    
+    pathways = GrowthPathway.objects.filter(child=child)
+    
+    growth_summary = {
+        'stage': {
+            'level': progression_stage.current_stage,
+            'name': progression_stage.get_stage_info().get('name', ''),
+            'emoji': progression_stage.get_stage_info().get('emoji', ''),
+        },
+        'pathways': [
+            {
+                'type': p.pathway_type,
+                'name': p.get_pathway_type_display(),
+                'level': p.level,
+                'progress': p.progress,
+            }
+            for p in pathways
+        ]
+    }
+    
+    return JsonResponse(growth_summary)
+
+
+def update_reflection(request, progress_id):
+    """Save a child's project reflection and apply growth boosts"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=400)
+    
+    child = get_child_from_session(request)
+    if not child:
+        return JsonResponse({'error': 'Not logged in'}, status=401)
+    
+    progress = get_object_or_404(ProjectProgress, id=progress_id, child=child)
+    
+    data = json.loads(request.body)
+    reflection_text = data.get('reflection_text', '').strip()
+    
+    if not reflection_text:
+        return JsonResponse({'error': 'Reflection too short'}, status=400)
+    
+    if len(reflection_text) < 20:
+        return JsonResponse({'error': 'Please share more detail (at least 20 characters)'}, status=400)
+    
+    # Save reflection
+    progress.reflection_text = reflection_text
+    progress.has_reflection = True
+    progress.reflection_at = timezone.now()
+    progress.save()
+    
+    # Now apply the growth boosts since we have a thoughtful reflection
+    project = progress.project
+    growth_result = child.apply_project_completion_boost(
+        project=project,
+        has_thoughtful_reflection=True  # We just saved meaningful reflection
+    )
+    
+    response = {
+        'success': True,
+        'message': '✨ Your reflection strengthened your growth!',
+        'growth_messages': growth_result['growth_messages'],
+        'stage_advanced': growth_result['stage_advanced'],
+        'new_stage': growth_result['new_stage'],
+        'new_badges': growth_result['new_badges']
+    }
+    
+    return JsonResponse(response)
+
+
+@login_required
+def clear_stage_modal(request):
+    """Clear stage advancement modal from session"""
+    if 'stage_advancement' in request.session:
+        del request.session['stage_advancement']
+    if 'new_badges' in request.session:
+        del request.session['new_badges']
+    return JsonResponse({'success': True})
+
+
+@login_required
+def progression_detail(request):
+    """Show detailed progression information"""
+    child = get_child_from_session(request)
+    if not child:
+        return redirect('users:child_login')
+    
+    from .models import ProgressionStage
+    
+    try:
+        progression_stage = ProgressionStage.objects.get(child=child)
+    except ProgressionStage.DoesNotExist:
+        progression_stage = ProgressionStage.objects.create(
+            child=child,
+            current_stage=ProgressionStage.EXPLORER
+        )
+    
+    stage_info = progression_stage.get_stage_info()
+    
+    context = {
+        'child': child,
+        'progression_stage': progression_stage,
+        'stage_info': stage_info,
+    }
+    
+    return render(request, 'users/progression_detail.html', context)

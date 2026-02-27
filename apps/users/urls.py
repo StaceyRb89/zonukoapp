@@ -21,4 +21,10 @@ urlpatterns = [
     path("kids/quiz/results/", views.quiz_results, name="quiz_results"),
     path("child/<int:child_id>/reset-quiz/", views.reset_child_quiz, name="reset_child_quiz"),
     path("projects/<int:project_id>/", views.project_detail, name="project_detail"),
+    # Growth Map & Progression routes
+    path("kids/growth-map/", views.growth_map, name="growth_map"),
+    path("kids/progression/", views.progression_detail, name="progression_detail"),
+    path("api/growth-summary/", views.growth_summary_api, name="growth_summary_api"),
+    path("api/projects/<int:progress_id>/reflection/", views.update_reflection, name="update_reflection"),
+    path("api/clear-stage-modal/", views.clear_stage_modal, name="clear_stage_modal"),
 ]

@@ -15,9 +15,14 @@
                 <p style="margin: 0; opacity: 0.9; font-size: 18px;">{{ child.get_age_range_display }}</p>
             {% endif %}
         </div>
-        <a href="{% url 'users:child_logout' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; backdrop-filter: blur(10px);">
-            Logout
-        </a>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'users:growth_map' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 8px;">
+                🗺️ Growth Map
+            </a>
+            <a href="{% url 'users:child_logout' %}" style="background: rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 600; backdrop-filter: blur(10px);">
+                Logout
+            </a>
+        </div>
     </div>
 
     <!-- Coming Soon Message -->

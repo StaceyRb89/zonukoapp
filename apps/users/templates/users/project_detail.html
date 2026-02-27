@@ -4,6 +4,32 @@
 {% block title %}{{ project.emoji }} {{ project.title }}{% endblock %}
 
 {% block content %}
+<!-- Stage Advancement Modal -->
+{% if request.session.stage_advancement %}
+<div id="stageModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 20px; padding: 40px; max-width: 500px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideIn 0.4s ease;">
+        <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+        <h2 style="margin: 0 0 15px 0; color: #667eea; font-size: 32px;">{{ request.session.stage_advancement.new_stage }}</h2>
+        <p style="font-size: 18px; color: #6b7280; margin-bottom: 30px;">You've advanced to a new stage!</p>
+        <button onclick="closeStageModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer;">
+            Continue →
+        </button>
+    </div>
+</div>
+<script>
+function closeStageModal() {
+    document.getElementById('stageModal').style.display = 'none';
+    fetch('{% url "users:clear_stage_modal" %}', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+}
+</script>
+<style>
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+</style>
+{% endif %}
+
 <style>
     /* Age-appropriate styling based on child's age range */
     {% if child.age_range == 'IMAGINAUTS' %}
@@ -376,7 +402,39 @@
 
     <!-- Rating System (only shown after completion) -->
     {% if progress.status == 'completed' %}
-    <div class="rating-stars">
+    
+    <!-- Reflection Section (only show if no reflection yet) -->
+    {% if not progress.reflection_text %}
+    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px solid #0ea5e9; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
+        <h2 style="margin-top: 0; color: #0369a1; display: flex; align-items: center; gap: 10px;">
+            💭 Take a Moment to Reflect
+        </h2>
+        <p style="color: #0c4a6e; margin-bottom: 20px;">
+            <strong>Did you know?</strong> When you think about what you learned, your brain grows stronger! 
+            Reflecting helps you understand how you learn best.
+        </p>
+        
+        <form id="reflection-form" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 10px;">
+                    What did you learn or discover?
+                </label>
+                <textarea 
+                    name="reflection_text" 
+                    placeholder="Tell us what you learned... (at least 20 characters for the boost!)"
+                    style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 16px; min-height: 80px;"
+                >{{ progress.reflection_text|default:'' }}</textarea>
+                <small style="color: #6b7280; display: block; margin-top: 5px;">Thoughtful reflections unlock growth boosts! ✨</small>
+            </div>
+            
+            <button type="button" onclick="saveReflection()" style="background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Save Reflection
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="rating-stars" {% if not progress.reflection_text %}style="display: none;"{% endif %}>
         <h2 style="text-align: center; margin-bottom: 20px;">
             {% if progress.rating %}
                 You rated this {{ progress.rating }} star{{ progress.rating|pluralize }}!
@@ -391,7 +449,7 @@
             
             {% for i in "12345" %}
                 <label class="star-label {% if progress.rating >= forloop.counter %}active{% endif %}" data-rating="{{ forloop.counter }}">
-                    ⭐
+                    ★
                 </label>
             {% endfor %}
         </form>
@@ -442,5 +500,169 @@ document.querySelector('.rating-stars')?.addEventListener('mouseleave', function
         }
     });
 });
+
+function saveReflection() {
+        const textarea = document.querySelector('textarea[name="reflection_text"]');
+        const reflectionText = textarea.value.trim();
+        
+        if (!reflectionText) {
+            alert('Please share what you learned!');
+            return;
+        }
+
+        // Disable button and show saving state
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+
+        // Send reflection to server
+        fetch(`/members/api/projects/{{ progress.id }}/reflection/`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                reflection_text: reflectionText
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showToast('✨ Great reflection! Your growth boost is being calculated...', 'success');
+                
+                // Hide reflection form
+                document.getElementById('reflection-form').parentElement.style.display = 'none';
+                
+                // Show growth messages if any
+                if (data.growth_messages && data.growth_messages.length > 0) {
+                    setTimeout(() => {
+                        data.growth_messages.forEach(msg => {
+                            showToast(msg, 'success');
+                        });
+                    }, 500);
+                }
+                
+                // Check if stage advanced - show modal
+                if (data.stage_advanced) {
+                    setTimeout(() => {
+                        showStageAdvancementModal(data.new_stage);
+                    }, 1500);
+                } else {
+                    // Show rating section if no modal
+                    setTimeout(() => {
+                        const ratingSection = document.querySelector('.rating-stars');
+                        if (ratingSection) {
+                            ratingSection.style.display = 'block';
+                            ratingSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }, 1500);
+                }
+            } else {
+                showToast('Error saving reflection: ' + (data.error || 'Unknown error'), 'error');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Connection error. Please try again.', 'error');
+            btn.textContent = originalText;
+            btn.disabled = false;
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            z-index: 9999;
+            animation: slideIn 0.3s ease-out;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    function showStageAdvancementModal(stageName) {
+        // Create modal dynamically for when stage is advanced from reflection save
+        const modal = document.createElement('div');
+        modal.id = 'dynamicStageModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        `;
+        
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.4s ease;
+        `;
+        
+        content.innerHTML = `
+            <div style="font-size: 80px; margin-bottom: 20px;">🎉</div>
+            <h2 style="margin: 0 0 15px 0; color: #667eea; font-size: 32px;">${stageName}</h2>
+            <p style="font-size: 18px; color: #6b7280; margin-bottom: 30px;">You've advanced to a new stage!</p>
+            <button onclick="closeDynamicModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer;">
+                Continue →
+            </button>
+        `;
+        
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+    }
+
+    function closeDynamicModal() {
+        const modal = document.getElementById('dynamicStageModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.remove();
+        }
+        
+        // Show rating section
+        const ratingSection = document.querySelector('.rating-stars');
+        if (ratingSection) {
+            ratingSection.style.display = 'block';
+            ratingSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
 </script>
 {% endblock %}

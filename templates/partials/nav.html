@@ -65,13 +65,25 @@
                 </svg>
                 About
             </a>
-            <a class="button primary" href="{% url 'core:example_projects' %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.35-4.35"/>
-                </svg>
-                Explore a project
-            </a>
+            {% if launch_mode == "PUBLIC" and not user.is_authenticated %}
+                <a href="{% url 'account_login' %}" class="button" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border: 1px solid #667eea;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                    Log in
+                </a>
+            {% endif %}
+            {% if not user.is_authenticated %}
+                <a class="button primary" href="{% if launch_mode == 'PUBLIC' %}{% url 'account_signup' %}{% else %}{% url 'founding:founding' %}{% endif %}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    {% if launch_mode == "PUBLIC" %}Start Free Trial{% else %}Claim Your Spot{% endif %}
+                </a>
+            {% endif %}
         </nav>
     </div>
 </header>

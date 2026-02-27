@@ -1,7 +1,11 @@
 from django.contrib import admin
 from django import forms
 from tinymce.widgets import TinyMCE
-from .models import ParentProfile, ChildProfile, Subscription, Project, ProjectProgress
+from .models import (
+    ParentProfile, ChildProfile, Subscription, Project, ProjectProgress,
+    ProgressionStage, GrowthPathway, ProjectSkillMapping, InspirationShare,
+    Skill, ProjectSkill
+)
 
 
 class ProjectAdminForm(forms.ModelForm):
@@ -114,21 +118,36 @@ class SubscriptionAdmin(admin.ModelAdmin):
     )
 
 
+class ProjectSkillInline(admin.TabularInline):
+    """Inline editor for ProjectSkill through model"""
+    model = ProjectSkill
+    extra = 1
+    fields = ("skill", "weight")
+    verbose_name = "Skill"
+    verbose_name_plural = "Skills"
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     form = ProjectAdminForm
-    list_display = ("emoji", "title", "category", "difficulty", "get_age_ranges", "estimated_time", "is_published", "created_at")
+    list_display = ("emoji", "title", "get_type", "category", "difficulty", "get_age_ranges", "get_visibility", "is_featured", "minimum_stage", "created_at")
     search_fields = ("title", "description")
-    list_filter = ("category", "difficulty", "is_published", "created_at")
-    list_editable = ("is_published",)
-    readonly_fields = ("created_at",)
+    list_filter = ("type", "category", "difficulty", "visibility", "is_featured", "minimum_stage", "created_at")
+    list_editable = ("is_featured",)
+    readonly_fields = ("created_at", "updated_at")
+    filter_horizontal = ("prerequisites",)
+    inlines = (ProjectSkillInline,)
     
     fieldsets = (
         ("📝 Basic Information", {
-            "fields": ("title", "emoji", "description", "category")
+            "fields": ("title", "emoji", "description", "category", "type")
         }),
-        ("🎯 Target Audience", {
-            "fields": ("age_ranges", "difficulty", "estimated_time", "tags_input")
+        ("🎯 Target Audience & Difficulty", {
+            "fields": ("age_ranges", "difficulty", "minimum_stage", "estimated_time", "tags_input")
+        }),
+        ("🔗 Learning Paths", {
+            "fields": ("prerequisites",),
+            "description": "Projects that should be completed before this one"
         }),
         ("📹 Media & Resources", {
             "fields": ("video_file", "video_url", "pdf_guide"),
@@ -138,8 +157,8 @@ class ProjectAdmin(admin.ModelAdmin):
             "fields": ("materials_needed", "instructions"),
             "classes": ("collapse",)
         }),
-        ("⚙️ Publishing", {
-            "fields": ("is_published", "created_at")
+        ("⚙️ Publishing & Visibility", {
+            "fields": ("visibility", "published_at", "is_featured", "order_priority", "created_at", "updated_at")
         }),
     )
     
@@ -154,11 +173,192 @@ class ProjectAdmin(admin.ModelAdmin):
         }
         return " ".join([badges.get(ar, ar) for ar in obj.age_ranges])
     get_age_ranges.short_description = "Age Groups"
+    
+    def get_type(self, obj):
+        """Display project type"""
+        types = {
+            'spark': '✨ Spark',
+            'lab': '🔬 Lab'
+        }
+        return types.get(obj.type, obj.type)
+    get_type.short_description = "Type"
+    
+    def get_visibility(self, obj):
+        """Display visibility status"""
+        status = {
+            'hidden': '👻 Hidden',
+            'scheduled': '📅 Scheduled',
+            'live': '🟢 Live',
+            'coming_soon': '🔮 Coming Soon'
+        }
+        return status.get(obj.visibility, obj.visibility)
+    get_visibility.short_description = "Status"
+
 
 
 @admin.register(ProjectProgress)
 class ProjectProgressAdmin(admin.ModelAdmin):
-    list_display = ("child", "project", "status", "rating", "started_at", "completed_at")
+    list_display = ("child", "project", "status", "rating", "has_reflection", "started_at", "completed_at")
     search_fields = ("child__username", "project__title")
-    list_filter = ("status", "rating")
-    readonly_fields = ("started_at", "completed_at")
+    list_filter = ("status", "rating", "has_reflection")
+    readonly_fields = ("started_at", "completed_at", "reflection_at")
+    fieldsets = (
+        ("Child & Project", {
+            "fields": ("child", "project", "status", "rating")
+        }),
+        ("Progress Tracking", {
+            "fields": ("started_at", "completed_at")
+        }),
+        ("Reflection & Notes", {
+            "fields": ("notes", "reflection_text", "has_reflection", "reflection_at")
+        }),
+    )
+
+
+@admin.register(ProgressionStage)
+class ProgressionStageAdmin(admin.ModelAdmin):
+    list_display = ("child", "current_stage", "get_stage_name", "updated_at")
+    search_fields = ("child__username",)
+    list_filter = ("current_stage",)
+    readonly_fields = ("reached_at", "updated_at")
+    
+    fieldsets = (
+        ("Child", {
+            "fields": ("child",)
+        }),
+        ("Stage Information", {
+            "fields": ("current_stage", "stage_description")
+        }),
+        ("Timestamps", {
+            "fields": ("reached_at", "updated_at")
+        }),
+    )
+    
+    def get_stage_name(self, obj):
+        return obj.get_stage_info().get('name', 'Unknown')
+    get_stage_name.short_description = "Stage Name"
+
+
+@admin.register(GrowthPathway)
+class GrowthPathwayAdmin(admin.ModelAdmin):
+    list_display = ("child", "pathway_type", "level", "progress", "points", "updated_at")
+    search_fields = ("child__username",)
+    list_filter = ("pathway_type", "level")
+    readonly_fields = ("created_at", "updated_at", "last_boosted_at")
+    
+    fieldsets = (
+        ("Child & Pathway", {
+            "fields": ("child", "pathway_type")
+        }),
+        ("Progress Metrics", {
+            "fields": ("level", "progress", "points")
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at", "last_boosted_at")
+        }),
+    )
+
+
+@admin.register(ProjectSkillMapping)
+class ProjectSkillMappingAdmin(admin.ModelAdmin):
+    list_display = ("project", "get_total_points", "created_at")
+    search_fields = ("project__title",)
+    readonly_fields = ("created_at", "updated_at")
+    
+    fieldsets = (
+        ("Project", {
+            "fields": ("project",)
+        }),
+        ("Skill Contributions", {
+            "fields": ("thinking_points", "making_points", "problem_solving_points", 
+                      "resilience_points", "design_planning_points", "contribution_points")
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at")
+        }),
+    )
+    
+    def get_total_points(self, obj):
+        total = (obj.thinking_points + obj.making_points + obj.problem_solving_points +
+                obj.resilience_points + obj.design_planning_points + obj.contribution_points)
+        return f"{total} pts"
+    get_total_points.short_description = "Total Points"
+
+
+@admin.register(InspirationShare)
+class InspirationShareAdmin(admin.ModelAdmin):
+    list_display = ("child", "project_progress", "saves_count", "inspired_builds", "shared_at")
+    search_fields = ("child__username", "project_progress__project__title")
+    list_filter = ("shared_at",)
+    readonly_fields = ("shared_at", "updated_at")
+    
+    fieldsets = (
+        ("Share Information", {
+            "fields": ("child", "project_progress")
+        }),
+        ("Content", {
+            "fields": ("description", "image_url")
+        }),
+        ("Engagement", {
+            "fields": ("saves_count", "inspired_builds")
+        }),
+        ("Timestamps", {
+            "fields": ("shared_at", "updated_at")
+        }),
+    )
+
+
+
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
+    """Admin for skill taxonomy"""
+    list_display = ("emoji", "name", "get_project_count", "created_at")
+    search_fields = ("name", "description")
+    readonly_fields = ("created_at",)
+    
+    fieldsets = (
+        ("📌 Skill Definition", {
+            "fields": ("emoji", "name", "description")
+        }),
+        ("Timestamps", {
+            "fields": ("created_at",)
+        }),
+    )
+    
+    def get_project_count(self, obj):
+        """Show how many projects use this skill"""
+        return obj.projects.count()
+    get_project_count.short_description = "Used in Projects"
+
+
+@admin.register(ProjectSkill)
+class ProjectSkillAdmin(admin.ModelAdmin):
+    """Admin for project-skill relationships with weights"""
+    list_display = ("get_project_title", "get_skill_name", "get_weight_stars", "created_at")
+    search_fields = ("project__title", "skill__name")
+    list_filter = ("weight", "project__category", "skill")
+    readonly_fields = ("created_at",)
+    
+    fieldsets = (
+        ("Link", {
+            "fields": ("project", "skill")
+        }),
+        ("Weight", {
+            "fields": ("weight",),
+            "description": "How central is this skill to the project?"
+        }),
+    )
+    
+    def get_project_title(self, obj):
+        return f"{obj.project.emoji} {obj.project.title}"
+    get_project_title.short_description = "Project"
+    
+    def get_skill_name(self, obj):
+        return f"{obj.skill.emoji} {obj.skill.name}"
+    get_skill_name.short_description = "Skill"
+    
+    def get_weight_stars(self, obj):
+        """Display weight as stars"""
+        stars = {1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐', 4: '⭐⭐⭐⭐', 5: '⭐⭐⭐⭐⭐'}
+        return stars.get(obj.weight, '?')
+    get_weight_stars.short_description = "Weight"

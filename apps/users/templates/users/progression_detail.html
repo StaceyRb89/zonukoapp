@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Progression Stages - {{ child.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progression-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .stage-timeline {
+        position: relative;
+        padding: 2rem 0;
+        margin: 2rem 0;
+    }
+    
+    .stage-timeline::before {
+        content: '';
+        position: absolute;
+        left: 25px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, #667eea, #764ba2);
+    }
+    
+    .stage-item {
+        position: relative;
+        margin-bottom: 3rem;
+        padding-left: 80px;
+    }
+    
+    .stage-item-number {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 3px solid #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: #667eea;
+        z-index: 2;
+    }
+    
+    .stage-item.current .stage-item-number {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .stage-item.completed .stage-item-number {
+        background: #4caf50;
+        border-color: #4caf50;
+        color: white;
+    }
+    
+    .stage-card {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stage-item.current .stage-card {
+        border-color: #667eea;
+        background: #f8f9ff;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    }
+    
+    .stage-item.completed .stage-card {
+        border-color: #4caf50;
+        background: #f1f8f4;
+    }
+    
+    .stage-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stage-emoji {
+        font-size: 2.5rem;
+    }
+    
+    .stage-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .stage-identity {
+        font-size: 1.1rem;
+        color: #666;
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+    
+    .current-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-left: 1rem;
+        text-transform: uppercase;
+    }
+    
+    .completed-badge {
+        display: inline-block;
+        background: #4caf50;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-left: 1rem;
+        text-transform: uppercase;
+    }
+    
+    .unlocks-section {
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .unlocks-title {
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .unlocks-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+    
+    .unlock-item {
+        background: white;
+        padding: 0.8rem;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        color: #333;
+        border-left: 3px solid #667eea;
+        padding-left: 1rem;
+    }
+    
+    .progression-description {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+    
+    .description-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .description-text {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        opacity: 0.95;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .progression-container {
+            padding: 1rem;
+        }
+        
+        .unlocks-list {
+            grid-template-columns: 1fr;
+        }
+        
+        .stage-title {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="progression-container">
+    <!-- Page Title -->
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <h1>🎯 Progression Stages</h1>
+        <p>Your journey as a creative problem solver</p>
+    </div>
+    
+    <!-- Description -->
+    <div class="progression-description">
+        <div class="description-title">No Points. No Grind. Just Growth.</div>
+        <div class="description-text">
+            Each stage represents your growing capability and confidence as a builder. 
+            Complete projects, reflect, and level up naturally through real learning.
+        </div>
+    </div>
+    
+    <!-- Stage Timeline -->
+    <div class="stage-timeline">
+        <!-- Stage 1: Explorer -->
+        <div class="stage-item {% if progression_stage.current_stage == 1 %}current{% elif progression_stage.current_stage > 1 %}completed{% endif %}">
+            <div class="stage-item-number">🌱</div>
+            <div class="stage-card">
+                <div class="stage-header">
+                    <div>
+                        <div class="stage-title">
+                            Explorer
+                            {% if progression_stage.current_stage == 1 %}<span class="current-badge">You are here</span>{% elif progression_stage.current_stage > 1 %}<span class="completed-badge">Completed</span>{% endif %}
+                        </div>
+                        <div class="stage-identity">"I can follow a build."</div>
+                    </div>
+                </div>
+                <p style="color: #666; margin: 1rem 0;">
+                    You're learning the basics. You follow instructions, explore materials, and discover what you can do. 
+                    You're building confidence through guided projects.
+                </p>
+                <div class="unlocks-section">
+                    <div class="unlocks-title">🔓 Unlocks</div>
+                    <div class="unlocks-list">
+                        <div class="unlock-item">Beginner challenges</div>
+                        <div class="unlock-item">Inspiration board browsing</div>
+                        <div class="unlock-item">Basic reflection prompts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stage 2: Experimenter -->
+        <div class="stage-item {% if progression_stage.current_stage == 2 %}current{% elif progression_stage.current_stage > 2 %}completed{% endif %}">
+            <div class="stage-item-number">🔍</div>
+            <div class="stage-card">
+                <div class="stage-header">
+                    <div>
+                        <div class="stage-title">
+                            Experimenter
+                            {% if progression_stage.current_stage == 2 %}<span class="current-badge">You are here</span>{% elif progression_stage.current_stage > 2 %}<span class="completed-badge">Completed</span>{% endif %}
+                        </div>
+                        <div class="stage-identity">"I can adapt and improve."</div>
+                    </div>
+                </div>
+                <p style="color: #666; margin: 1rem 0;">
+                    You're starting to make changes. You try different materials, adapt designs slightly, 
+                    and figure out what works and what doesn't. You're learning through experimentation.
+                </p>
+                <div class="unlocks-section">
+                    <div class="unlocks-title">🔓 Unlocks</div>
+                    <div class="unlocks-list">
+                        <div class="unlock-item">"Try it differently" prompts</div>
+                        <div class="unlock-item">Material swap challenges</div>
+                        <div class="unlock-item">Compare builds on board</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stage 3: Builder -->
+        <div class="stage-item {% if progression_stage.current_stage == 3 %}current{% elif progression_stage.current_stage > 3 %}completed{% endif %}">
+            <div class="stage-item-number">🧱</div>
+            <div class="stage-card">
+                <div class="stage-header">
+                    <div>
+                        <div class="stage-title">
+                            Builder
+                            {% if progression_stage.current_stage == 3 %}<span class="current-badge">You are here</span>{% elif progression_stage.current_stage > 3 %}<span class="completed-badge">Completed</span>{% endif %}
+                        </div>
+                        <div class="stage-identity">"I can strengthen and improve designs."</div>
+                    </div>
+                </div>
+                <p style="color: #666; margin: 1rem 0;">
+                    You understand structure. You test limits, reinforce weak spots, and explain why things work. 
+                    You're building with intention and understanding.
+                </p>
+                <div class="unlocks-section">
+                    <div class="unlocks-title">🔓 Unlocks</div>
+                    <div class="unlocks-list">
+                        <div class="unlock-item">Constraint challenges</div>
+                        <div class="unlock-item">Limited-material builds</div>
+                        <div class="unlock-item">Skill pathway visibility</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stage 4: Designer -->
+        <div class="stage-item {% if progression_stage.current_stage == 4 %}current{% elif progression_stage.current_stage > 4 %}completed{% endif %}">
+            <div class="stage-item-number">🛠</div>
+            <div class="stage-card">
+                <div class="stage-header">
+                    <div>
+                        <div class="stage-title">
+                            Designer
+                            {% if progression_stage.current_stage == 4 %}<span class="current-badge">You are here</span>{% elif progression_stage.current_stage > 4 %}<span class="completed-badge">Completed</span>{% endif %}
+                        </div>
+                        <div class="stage-identity">"I can plan before building."</div>
+                    </div>
+                </div>
+                <p style="color: #666; margin: 1rem 0;">
+                    You think before you build. You sketch your ideas, choose materials intentionally, 
+                    and iterate based on testing. You're designing with vision.
+                </p>
+                <div class="unlocks-section">
+                    <div class="unlocks-title">🔓 Unlocks</div>
+                    <div class="unlocks-list">
+                        <div class="unlock-item">Design-your-own variation</div>
+                        <div class="unlock-item">Project remix mode</div>
+                        <div class="unlock-item">Improve someone else's idea</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stage 5: Independent Maker -->
+        <div class="stage-item {% if progression_stage.current_stage == 5 %}current{% elif progression_stage.current_stage > 5 %}completed{% endif %}">
+            <div class="stage-item-number">🔥</div>
+            <div class="stage-card">
+                <div class="stage-header">
+                    <div>
+                        <div class="stage-title">
+                            Independent Maker
+                            {% if progression_stage.current_stage == 5 %}<span class="current-badge">You are here</span>{% elif progression_stage.current_stage > 5 %}<span class="completed-badge">Completed</span>{% endif %}
+                        </div>
+                        <div class="stage-identity">"I build with purpose."</div>
+                    </div>
+                </div>
+                <p style="color: #666; margin: 1rem 0;">
+                    You create from scratch. You solve real-world problems, inspire others, and 
+                    reflect deeply on your learning. You're a true independent maker.
+                </p>
+                <div class="unlocks-section">
+                    <div class="unlocks-title">🔓 Unlocks</div>
+                    <div class="unlocks-list">
+                        <div class="unlock-item">Open-ended builds</div>
+                        <div class="unlock-item">Community inspiration badge</div>
+                        <div class="unlock-item">Advanced track pathways</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e0e0e0;">
+        <a href="{% url 'users:growth_map' %}" class="btn btn-primary">
+            ← Back to Growth Map
+        </a>
+        <a href="{% url 'users:child_dashboard' %}" class="btn btn-secondary" style="margin-left: 1rem;">
+            Back to Dashboard →
+        </a>
+    </div>
+</div>
+{% endblock %}

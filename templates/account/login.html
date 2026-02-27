@@ -14,9 +14,11 @@
 
             {% if messages %}
                 {% for message in messages %}
-                    <div style="padding: 1rem; margin-bottom: 1rem; border-radius: 12px; background: {% if message.tags == 'error' %}#fee2e2; color: #991b1b;{% else %}#dbeafe; color: #1e40af;{% endif %}">
+                    {% if message.tags == 'error' %}
+                    <div style="padding: 1rem; margin-bottom: 1rem; border-radius: 12px; background: #fee2e2; color: #991b1b;">
                         {{ message }}
                     </div>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
 

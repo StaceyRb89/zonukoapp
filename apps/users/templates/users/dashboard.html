@@ -1,18 +1,170 @@
 {% extends "base.html" %}
 
+{% block navigation %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block title %}Member Dashboard - Zonuko{% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 1200px; margin: 40px auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px;">
-        <h1 style="margin: 0 0 10px 0;">⭐ Welcome to Your Zonuko Dashboard!</h1>
-        <p style="margin: 0; opacity: 0.9;">Hi {{ user.email }}! This is your member area (Staff Access - Development Mode)</p>
+<style>
+    .parent-user-menu-wrap { position: fixed; top: 12px; right: 12px; z-index: 1000; }
+    .parent-user-menu-toggle { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px 10px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-size: 13px; }
+    .parent-user-menu-toggle .menu-email { font-weight: 600; color: #1f2937; }
+    .parent-user-menu-toggle .burger-icon { display: none; }
+    .parent-user-menu-dropdown { display: none; position: absolute; top: 44px; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 12px; min-width: 220px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+
+    .dashboard-shell { max-width: 1200px; margin: 70px auto 40px; padding: 16px; }
+    .children-header { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; }
+    .children-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:14px; justify-content: center; max-width: 900px; margin: 0 auto; }
+    .child-card { border: 1px solid #ececec; padding: 14px; border-radius: 12px; min-height: 500px; box-sizing: border-box; text-align:center; background:#fff; display: flex; flex-direction: column; }
+    .child-card-content { flex: 1; display: flex; flex-direction: column; }
+    .child-avatar { font-size: 44px; line-height: 1; margin-bottom: 8px; }
+    .child-name { margin: 0 0 6px 0; font-size: clamp(1rem, 4vw, 1.3rem); line-height: 1.2; word-break: break-word; }
+    .child-actions { display:flex; gap:8px; justify-content:center; align-items:center; margin-top:auto; padding-top:10px; border-top:1px solid #e5e7eb; flex-wrap:wrap; }
+
+    @media (max-width: 768px) {
+        .parent-user-menu-toggle { padding: 6px 8px; border-radius: 8px; gap: 6px; }
+        .parent-user-menu-toggle .menu-email,
+        .parent-user-menu-toggle .user-icon,
+        .parent-user-menu-toggle .dropdown-icon { display: none; }
+        .parent-user-menu-toggle .burger-icon { display: inline; }
+
+        .dashboard-shell { margin-top: 58px; padding: 10px; }
+        .children-header h2 { font-size: 1.05rem; line-height: 1.2; }
+        .children-header a { padding: 6px 10px !important; font-size: 12px !important; white-space: nowrap; }
+        .children-grid { grid-template-columns: 1fr; gap: 10px; justify-content: stretch; }
+        .child-card { padding: 12px; width: 100%; max-width: 100%; min-height: auto; }
+        .child-avatar { font-size: 34px; margin-bottom: 6px; }
+        .child-name { font-size: 1.1rem; margin-bottom: 4px; }
+    }
+</style>
+
+<!-- User Menu Dropdown (top-right) -->
+<div class="parent-user-menu-wrap">
+    <div style="position: relative;">
+        <button onclick="toggleUserMenu()" class="parent-user-menu-toggle" id="parentUserMenuToggle">
+            <span class="user-icon" style="font-size: 18px;">👤</span>
+            <span class="menu-email">{{ user.email|truncatechars:20 }}</span>
+            <svg class="burger-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+            <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="dropdownArrow">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
+        
+        <div id="userMenuDropdown" class="parent-user-menu-dropdown">
+            <div style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">
+                <div style="font-weight: 600; color: #1f2937;">Parent Account</div>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">{{ user.email }}</div>
+            </div>
+            <a href="{% url 'users:dashboard' %}" style="display: block; padding: 12px 16px; color: #1f2937; text-decoration: none; border-bottom: 1px solid #e5e7eb;">
+                <span style="margin-right: 8px;">🏠</span> Parent Dashboard
+            </a>
+            <a href="#children" style="display: block; padding: 12px 16px; color: #1f2937; text-decoration: none; border-bottom: 1px solid #e5e7eb;">
+                <span style="margin-right: 8px;">👦👧</span> My Children
+            </a>
+            <a href="{% url 'core:faq' %}" style="display: block; padding: 12px 16px; color: #1f2937; text-decoration: none; border-bottom: 1px solid #e5e7eb;">
+                <span style="margin-right: 8px;">❓</span> Help & FAQ
+            </a>
+            <a href="{% url 'account_logout' %}" style="display: block; padding: 12px 16px; color: #dc2626; text-decoration: none;">
+                <span style="margin-right: 8px;">🚪</span> Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userMenuDropdown');
+    const arrow = document.getElementById('dropdownArrow');
+    if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+    } else {
+        dropdown.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const userMenu = event.target.closest('[onclick="toggleUserMenu()"]');
+    const dropdown = document.getElementById('userMenuDropdown');
+    if (!userMenu && dropdown && !dropdown.contains(event.target)) {
+        dropdown.style.display = 'none';
+        document.getElementById('dropdownArrow').style.transform = 'rotate(0deg)';
+    }
+});
+</script>
+
+<div class="container dashboard-shell">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: clamp(20px, 5vw, 30px); border-radius: 12px; margin-bottom: 30px;">
+        <h1 style="margin: 0 0 10px 0; font-size: clamp(1.25rem, 4vw, 1.75rem);">⭐ Welcome to Your Parent Dashboard!</h1>
+        {% if user.is_staff %}
+            <p style="margin: 0; opacity: 0.9; font-size: clamp(0.875rem, 3vw, 1rem); word-break: break-word;">Hi {{ user.email }}! This is your staff view of the member area.</p>
+        {% else %}
+            <p style="margin: 0; opacity: 0.9; font-size: clamp(0.875rem, 3vw, 1rem); word-break: break-word;">Hi {{ user.email }}! This is your parent dashboard.</p>
+        {% endif %}
+    </div>
+
+    <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <h2 style="margin: 0 0 8px 0; color: #1e3a8a;">🏅 Weekly Wins</h2>
+        {% if weekly_wins.total_completed > 0 %}
+            <p style="margin: 0 0 12px 0; color: #1e40af; font-size: 15px;">
+                This week your family completed <strong>{{ weekly_wins.total_completed }}</strong> project{{ weekly_wins.total_completed|pluralize }} and shared <strong>{{ weekly_wins.total_reflections }}</strong> reflection{{ weekly_wins.total_reflections|pluralize }}.
+            </p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                {% if weekly_wins.top_skill_label %}
+                    <span style="background:#dbeafe; color:#1d4ed8; padding:6px 10px; border-radius:999px; font-size:13px;">💡 Strongest growth: {{ weekly_wins.top_skill_label }} +{{ weekly_wins.top_skill_points }}</span>
+                {% endif %}
+                {% if weekly_wins.spotlight_child %}
+                    <span style="background:#dcfce7; color:#166534; padding:6px 10px; border-radius:999px; font-size:13px;">🌟 Spotlight: {{ weekly_wins.spotlight_child.username }} completed {{ weekly_wins.spotlight_count }} this week</span>
+                {% endif %}
+            </div>
+        {% else %}
+            <p style="margin: 0; color: #1e40af;">A new week to build confidence. First project win will appear here.</p>
+        {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+        <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 20px;">
+            <h3 style="margin: 0 0 10px 0; color: #065f46;">🎉 Praise Highlights</h3>
+            {% if child_summaries %}
+                <div style="display:grid; gap:8px;">
+                    {% for item in child_summaries %}
+                        <div style="font-size: 14px; color: #065f46; background: rgba(255,255,255,0.75); border-radius: 8px; padding: 8px 10px;">
+                            <strong>{{ item.child.username }}:</strong> {{ item.praise_message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="margin:0; color:#065f46;">Add a child to start celebrating learning wins.</p>
+            {% endif %}
+        </div>
+
+        <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 20px;">
+            <h3 style="margin: 0 0 10px 0; color: #9a3412;">🧭 Quick Attention List</h3>
+            {% if attention_items %}
+                <div style="display:grid; gap:8px; max-height:200px; overflow-y:auto;">
+                    {% for item in attention_items %}
+                        <div style="font-size: 13px; color: #7c2d12; background: rgba(255,255,255,0.75); border-radius: 8px; padding: 8px 10px;">
+                            <strong>{{ item.child_name }}</strong> · {{ item.project_title|truncatechars:36 }}<br>
+                            <span style="font-size:12px;">{{ item.action }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="margin:0; color:#9a3412;">Everything is up to date — great family momentum.</p>
+            {% endif %}
+        </div>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
         <!-- Profile Card -->
         <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <h2 style="margin-top: 0; color: #667eea;">👤 Your Profile</h2>
+            <h2 style="margin-top: 0; color: #667eea;">👤 Parent Profile</h2>
             {% if parent_profile %}
                 <p><strong>Display Name:</strong> {{ parent_profile.display_name|default:"Not set" }}</p>
                 <p><strong>Email:</strong> {{ user.email }}</p>
@@ -24,7 +176,7 @@
 
         <!-- Subscription Card -->
         <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <h2 style="margin-top: 0; color: #667eea;">💳 Subscription Status</h2>
+            <h2 style="margin-top: 0; color: #667eea;">💳 Subscription & Billing</h2>
             {% if has_subscription %}
                 {% if parent_profile.subscription.founding_member %}
                     <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
@@ -51,63 +203,170 @@
                 </a>
             {% endif %}
         </div>
+
+        <!-- Quick Family Learning Feed -->
+        <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; color: #667eea;">📝 Recent Learning Moments</h2>
+            {% if recent_reflections %}
+                <div style="display: grid; gap: 10px; max-height: 220px; overflow-y: auto; padding-right: 6px;">
+                    {% for item in recent_reflections|slice:":5" %}
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px;">
+                            <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
+                                <strong>{{ item.child.username }}</strong> · {{ item.project.title }}
+                            </div>
+                            <div style="font-size: 13px; color: #111827; line-height: 1.4;">
+                                “{{ item.reflection_text|truncatechars:95 }}”
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #6b7280; margin: 0;">No reflections yet. Once a child completes and reflects, it will appear here.</p>
+            {% endif %}
+        </div>
     </div>
 
     <!-- Children Section -->
     <div style="background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; color: #667eea;">👦👧 Your Children</h2>
+        <div class="children-header">
+              <h2 style="margin: 0; color: #667eea;">👦👧 Your Children (Profiles)</h2>
             <a href="{% url 'users:add_child' %}" style="display: inline-block; background: #764ba2; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">
                 + Add a Child
             </a>
         </div>
-        {% if children %}
-            <div style="display: grid; gap: 15px;">
-                {% for child in children %}
-                    <div style="border: 2px solid #f0f0f0; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="font-size: 48px;">{{ child.get_avatar_emoji }}</div>
-                            <div>
-                                <h3 style="margin: 0 0 5px 0;">{{ child.username }}</h3>
-                                <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Age Group:</strong> {{ child.get_age_range_display }}</p>
-                                {% if child.quiz_completed %}
-                                    <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 13px; margin-top: 5px;">
-                                        ✨ {{ child.learning_style }}
-                                    </div>
-                                {% else %}
-                                    <p style="margin: 5px 0; color: #999; font-size: 13px; font-style: italic;">Quiz not completed yet</p>
-                                {% endif %}
-                                <p style="margin: 8px 0 0 0; color: #999; font-size: 12px;"><strong>PIN:</strong> ●●●● (hidden for security)</p>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 10px; flex-direction: column; align-items: flex-end;">
-                            <div style="display: flex; gap: 10px;">
-                                <a href="{% url 'users:edit_child' child.id %}" style="color: #667eea; text-decoration: none; font-size: 14px;">Edit</a>
-                                <a href="{% url 'users:delete_child' child.id %}" style="color: #dc2626; text-decoration: none; font-size: 14px;">Remove</a>
-                            </div>
+        {% if child_summaries %}
+            <div class="children-grid">
+                {% for item in child_summaries %}
+                    {% with child=item.child %}
+                    <div class="child-card">
+                        <div class="child-card-content">
+                            <div class="child-avatar">{{ child.get_avatar_emoji }}</div>
+                            <h3 class="child-name">{{ child.username }}</h3>
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>Age Group:</strong> {{ child.get_age_range_display }}</p>
                             {% if child.quiz_completed %}
-                                <form method="post" action="{% url 'users:reset_child_quiz' child.id %}" style="margin: 0;">
+                                <div style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 12px; font-size: 13px; margin-top: 5px;">
+                                    ✨ {{ child.learning_style }}
+                                </div>
+                            {% else %}
+                                <p style="margin: 5px 0; color: #999; font-size: 13px; font-style: italic;">Quiz not completed yet</p>
+                            {% endif %}
+                            <div style="margin-top: 15px;">
+                                <div style="font-size: 12px; color: #6b7280; margin-bottom: 6px;">
+                                    {{ item.completed_count }}/{{ item.total_projects }} completed · {{ item.in_progress_count }} in progress
+                                </div>
+                                <div style="width: 100%; max-width: 280px; height: 8px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin: 0 auto;">
+                                    <div style="width: {{ item.completion_percent }}%; height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a);"></div>
+                                </div>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; font-size:12px; justify-content: center;">
+                                    {% if item.needs_reflection_count > 0 %}
+                                        <span style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:999px;">💭 {{ item.needs_reflection_count }} reflection{{ item.needs_reflection_count|pluralize }} needed</span>
+                                    {% endif %}
+                                    {% if item.needs_rating_count > 0 %}
+                                        <span style="background:#dbeafe; color:#1e40af; padding:3px 8px; border-radius:999px;">⭐ {{ item.needs_rating_count }} rating{{ item.needs_rating_count|pluralize }} pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p style="margin: 10px 0 0 0; font-size: 13px; color: #065f46; background: #ecfdf5; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                                {{ item.praise_message }}
+                            </p>
+
+                            <div style="margin-top: 12px; display:flex; gap:6px; flex-wrap:wrap; justify-content: center;">
+                                {% if item.top_skills %}
+                                    {% for skill in item.top_skills %}
+                                        <span style="font-size:12px; background:#eef2ff; color:#3730a3; padding:4px 8px; border-radius:999px;">
+                                            {{ skill.label }} +{{ skill.score }}
+                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span style="font-size:12px; color:#6b7280;">Skills will appear after first completed project.</span>
+                                {% endif %}
+                            </div>
+
+                            <div style="margin-top: 12px; display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; max-width: 280px; margin-left: auto; margin-right: auto;">
+                                {% for pathway_name, pathway_value in item.pathway_snapshot %}
+                                    <div style="font-size:11px; color:#374151;">
+                                        {{ pathway_name }}
+                                        <div style="height:6px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin-top:3px;">
+                                            <div style="width: {{ pathway_value }}%; height:100%; background:#6366f1;"></div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <p style="margin: 12px 0 0 0; color: #999; font-size: 12px;"><strong>PIN:</strong> ●●●● (hidden for security)</p>
+                        </div>
+                        <div class="child-actions">
+                            <a href="{% url 'users:edit_child' child.id %}" style="color: #667eea; text-decoration: none; font-size: 14px; font-weight: 500;">Edit</a>
+                            <span style="color: #d1d5db;">|</span>
+                            <a href="{% url 'users:delete_child' child.id %}" style="color: #dc2626; text-decoration: none; font-size: 14px; font-weight: 500;">Remove</a>
+                            {% if child.quiz_completed %}
+                                <span style="color: #d1d5db;">|</span>
+                                <form method="post" action="{% url 'users:reset_child_quiz' child.id %}" style="margin: 0; display: inline;">
                                     {% csrf_token %}
-                                    <button type="submit" style="background: none; border: none; color: #f59e0b; text-decoration: underline; font-size: 12px; cursor: pointer; padding: 0;">
+                                    <button type="submit" style="background: none; border: none; color: #f59e0b; text-decoration: underline; font-size: 12px; cursor: pointer; padding: 0; font-weight: 500;">
                                         Reset Quiz
                                     </button>
                                 </form>
                             {% endif %}
                         </div>
                     </div>
+                    {% endwith %}
                 {% endfor %}
             </div>
         {% else %}
-            <p style="color: #666;">No children added yet. Click "+ Add a Child" above to get started!</p>
+            <!-- Empty State: Getting Started Guide -->
+            <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 2px dashed #0ea5e9; border-radius: 12px; padding: 40px; text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🚀</div>
+                <h3 style="margin: 0 0 15px 0; color: #0369a1; font-size: 24px;">Let's Get Started!</h3>
+                <p style="color: #0c4a6e; margin-bottom: 30px; font-size: 16px;">Three simple steps to unlock personalized STEAM projects:</p>
+                
+                <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    <div style="display: flex; align-items: start; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #0ea5e9; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">1</div>
+                        <div>
+                            <strong style="color: #1f2937;">Add Your Child's Profile</strong>
+                            <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 14px;">Click "+ Add a Child" to create their account with a secure PIN</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: start; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #0ea5e9; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">2</div>
+                        <div>
+                            <strong style="color: #1f2937;">Child Takes Quick Quiz</strong>
+                            <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 14px;">They answer 2-3 fun questions to discover their learning style</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: start; gap: 15px;">
+                        <div style="background: #0ea5e9; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold;">3</div>
+                        <div>
+                            <strong style="color: #1f2937;">Start Exploring Projects!</strong>
+                            <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 14px;">Browse age-appropriate STEAM projects matched to their interests</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="{% url 'users:add_child' %}" style="display: inline-block; background: #0ea5e9; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);">
+                    + Add Your First Child
+                </a>
+            </div>
         {% endif %}
     </div>
 
-    <div style="margin-top: 30px; padding: 20px; background: #dbeafe; border-left: 4px solid #667eea; border-radius: 6px;">
-        <strong>💡 Tip:</strong> Each child gets their own login with a 4-digit PIN, personalized recommendations based on their age group, and progress tracking.
-    </div>
-
-    <div style="margin-top: 20px; text-align: center;">
-        <a href="{% url 'account_logout' %}" style="color: #667eea; text-decoration: none;">Logout</a>
+    <!-- Helpful Resources -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <a href="{% url 'core:faq' %}" style="display: block; background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; text-decoration: none; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.2)'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <div style="font-size: 32px; margin-bottom: 10px;">❓</div>
+            <div style="font-weight: 600; color: #1f2937;">Help & FAQ</div>
+            <div style="font-size: 13px; color: #6b7280; margin-top: 5px;">Common questions answered</div>
+        </a>
+        <a href="{% url 'core:how_it_works' %}" style="display: block; background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; text-decoration: none; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.2)'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <div style="font-size: 32px; margin-bottom: 10px;">📖</div>
+            <div style="font-weight: 600; color: #1f2937;">How It Works</div>
+            <div style="font-size: 13px; color: #6b7280; margin-top: 5px;">Learn about Zonuko</div>
+        </a>
+        <a href="{% url 'core:example_projects' %}" style="display: block; background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; text-decoration: none; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.2)'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'">
+            <div style="font-size: 32px; margin-bottom: 10px;">🔬</div>
+            <div style="font-weight: 600; color: #1f2937;">Example Projects</div>
+            <div style="font-size: 13px; color: #6b7280; margin-top: 5px;">See what kids will build</div>
+        </a>
     </div>
 </div>
 {% endblock %}

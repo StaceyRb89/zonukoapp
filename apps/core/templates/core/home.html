@@ -22,26 +22,63 @@
                 <p class="trust-line" style="margin-top: 1.5rem;">Designed by UK educators</p>
             </div>
             <div class="hero-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <p class="badge" style="background: rgba(255,255,255,0.2); color: white; margin-bottom: 1rem;">🔥 Founding Families Open</p>
-                <h2 style="color: white; margin: 0 0 0.5rem 0;">£9.99/month</h2>
-                <p style="font-size: 0.9rem; margin: 0 0 1.5rem 0; opacity: 0.9;">Locked in forever for founding families<br>(Regular price £14.99/month)</p>
-                
-                <!-- CTA Buttons at top -->
-                <div class="hero-actions" style="flex-direction: column; margin-bottom: 1.5rem;">
-                    <a class="button primary" href="{% url 'founding:founding' %}" style="width: 100%; background: white; color: #667eea; font-weight: bold; font-size: 1.05rem; padding: 0.9rem 1.5rem;">Claim Your Spot ({{ spots_remaining }} left)</a>
-                    <a class="button" href="{% url 'core:example_projects' %}" style="width: 100%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);">See Example Projects</a>
-                </div>
-                
-                <ul class="checklist" style="margin-bottom: 1rem; font-size: 0.95rem;">
-                    <li>Early access before public launch</li>
-                    <li>Help shape what we build next</li>
-                    <li>Founding Family badge</li>
-                    <li>First access to new projects</li>
-                </ul>
-                <p style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 0.75rem;">
-                    <strong>{{ total_signups }} of {{ founding_limit }}</strong> spots claimed
-                </p>
-                <p class="callout" style="color: rgba(255,255,255,0.8); margin-top: 0; font-size: 0.85rem;">No spam. We'll email you about launch only.</p>
+                {% if launch_mode == "FOUNDING" %}
+                    {% if signups_closed %}
+                        {# Founding spots filled - show waitlist #}
+                        <p class="badge" style="background: rgba(255,255,255,0.2); color: white; margin-bottom: 1rem;">✅ All Founding Spots Claimed</p>
+                        <h2 style="color: white; margin: 0 0 0.5rem 0;">Join the Waitlist</h2>
+                        <p style="font-size: 0.9rem; margin: 0 0 1.5rem 0; opacity: 0.9;">Be first to know when we open to the public</p>
+                        
+                        <div class="hero-actions" style="flex-direction: column; margin-bottom: 1.5rem;">
+                            <a class="button primary" href="{% url 'founding:founding' %}" style="width: 100%; background: white; color: #667eea; font-weight: bold; font-size: 1.05rem; padding: 0.9rem 1.5rem;">Join Waitlist</a>
+                            <a class="button" href="{% url 'core:example_projects' %}" style="width: 100%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);">See Example Projects</a>
+                        </div>
+                        
+                        <p style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 0.75rem;">
+                            <strong>{{ total_signups }}</strong> founding families secured their spot
+                        </p>
+                        <p class="callout" style="color: rgba(255,255,255,0.8); margin-top: 0; font-size: 0.85rem;">Public launch coming soon!</p>
+                    {% else %}
+                        {# Founding spots still available #}
+                        <p class="badge" style="background: rgba(255,255,255,0.2); color: white; margin-bottom: 1rem;">🔥 Founding Families Open</p>
+                        <h2 style="color: white; margin: 0 0 0.5rem 0;">£9.99/month</h2>
+                        <p style="font-size: 0.9rem; margin: 0 0 1.5rem 0; opacity: 0.9;">Locked in forever for founding families<br>(Regular price £14.99/month)</p>
+                        
+                        <div class="hero-actions" style="flex-direction: column; margin-bottom: 1.5rem;">
+                            <a class="button primary" href="{% url 'founding:founding' %}" style="width: 100%; background: white; color: #667eea; font-weight: bold; font-size: 1.05rem; padding: 0.9rem 1.5rem;">Claim Your Spot ({{ spots_remaining }} left)</a>
+                            <a class="button" href="{% url 'core:example_projects' %}" style="width: 100%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);">See Example Projects</a>
+                        </div>
+                        
+                        <ul class="checklist" style="margin-bottom: 1rem; font-size: 0.95rem;">
+                            <li>Early access before public launch</li>
+                            <li>Help shape what we build next</li>
+                            <li>Founding Family badge</li>
+                            <li>First access to new projects</li>
+                        </ul>
+                        <p style="background: rgba(255,255,255,0.15); padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; margin-bottom: 0.75rem;">
+                            <strong>{{ total_signups }} of {{ founding_limit }}</strong> spots claimed
+                        </p>
+                        <p class="callout" style="color: rgba(255,255,255,0.8); margin-top: 0; font-size: 0.85rem;">No spam. We'll email you about launch only.</p>
+                    {% endif %}
+                {% else %}
+                    {# Public launch mode #}
+                    <p class="badge" style="background: rgba(255,255,255,0.2); color: white; margin-bottom: 1rem;">🚀 Now Open to Everyone</p>
+                    <h2 style="color: white; margin: 0 0 0.5rem 0;">£14.99/month</h2>
+                    <p style="font-size: 0.9rem; margin: 0 0 1.5rem 0; opacity: 0.9;">7-day free trial, cancel anytime</p>
+                    
+                    <div class="hero-actions" style="flex-direction: column; margin-bottom: 1.5rem;">
+                        <a class="button primary" href="{% url 'account_signup' %}" style="width: 100%; background: white; color: #667eea; font-weight: bold; font-size: 1.05rem; padding: 0.9rem 1.5rem;">Start Free Trial</a>
+                        <a class="button" href="{% url 'account_login' %}" style="width: 100%; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);">Already a member? Log in</a>
+                    </div>
+                    
+                    <ul class="checklist" style="margin-bottom: 1rem; font-size: 0.95rem;">
+                        <li>Unlimited STEAM projects for ages 6-16</li>
+                        <li>Up to 5 child profiles</li>
+                        <li>Progress tracking & badges</li>
+                        <li>Safe, moderated showcase space</li>
+                    </ul>
+                    <p class="callout" style="color: rgba(255,255,255,0.8); margin-top: 0; font-size: 0.85rem;">Join {{ total_signups }}+ families already learning with Zonuko</p>
+                {% endif %}
             </div>
         </div>
     </div>

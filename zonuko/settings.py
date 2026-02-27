@@ -26,6 +26,10 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", True)
+
+# Launch mode: "FOUNDING" (pre-launch, collect 200 signups) or "PUBLIC" (open to all)
+LAUNCH_MODE = os.environ.get("LAUNCH_MODE", "FOUNDING")  # Change to "PUBLIC" after 200 signups
+
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split() or [
     "localhost", 
     "127.0.0.1",
@@ -86,6 +90,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "zonuko.context_processors.launch_mode",  # Make LAUNCH_MODE available in all templates
             ],
         },
     },
@@ -159,6 +164,12 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 LOGIN_REDIRECT_URL = "/members/dashboard/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
+# Development override: allow login without email verification
+if DEBUG:
+    ACCOUNT_EMAIL_VERIFICATION = "none"
+    ACCOUNT_EMAIL_REQUIRED = False
+    ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
+
 # Email settings
 if os.environ.get("EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -191,6 +202,28 @@ AWS_S3_OBJECT_PARAMETERS = {
 AWS_LOCATION = "media"
 AWS_DEFAULT_ACL = "public-read"
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.nyc3.digitaloceanspaces.com"
+
+# Use Digital Ocean Spaces for media storage in production
+if not DEBUG:
+    STORAGES = {
+        "default": {
+            "BACKEND": "zonuko.storage_backends.MediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
+else:
+    # Development - use local filesystem
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 # Jazzmin Admin Theme Configuration
 JAZZMIN_SETTINGS = {

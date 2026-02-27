@@ -7,7 +7,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("", include("apps.core.urls")),
     path("founding/", include("apps.founding.urls")),
-    path("accounts/", include("allauth.urls")),
+    path("members/accounts/", include("allauth.urls")),  # Parent login/signup under /members/
     path("members/", include("apps.users.urls")),
     path("creator/", admin.site.urls),
     path("tinymce/", include("tinymce.urls")),
