@@ -2,11 +2,70 @@
 {% load i18n %}
 
 {% block content %}
+{% url 'admin:users_childhelprequest_changelist' as help_requests_admin_url %}
+<style>
+    #content-main .module {
+        color: #1f2937;
+    }
+
+    #content-main .module h2,
+    #content-main .module caption {
+        color: #ffffff !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    #content-main .module h3,
+    #content-main .module p,
+    #content-main .module li,
+    #content-main .module caption,
+    #content-main .module th,
+    #content-main .module td {
+        color: #1f2937 !important;
+    }
+
+    #content-main .module a {
+        color: #2563eb !important;
+    }
+
+    #content-main .module a:hover {
+        color: #1d4ed8 !important;
+    }
+
+    #content-main .module .button {
+        background: #4f46e5;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 6px;
+        color: #ffffff !important;
+    }
+
+    #content-main .urgent-help-module {
+        border-left: 6px solid #22c55e;
+        background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    }
+
+    #content-main .urgent-help-module,
+    #content-main .urgent-help-module h2,
+    #content-main .urgent-help-module p,
+    #content-main .urgent-help-module a {
+        color: #ffffff !important;
+    }
+</style>
 <div id="content-main">
+    <div class="module urgent-help-module">
+        <h2 style="margin-bottom: 8px;">✅ Urgent Support Queue</h2>
+        <p style="margin: 0 0 10px 0; font-size: 14px;">
+            Check child help requests and respond quickly where needed.
+        </p>
+        <p style="margin: 0 0 10px 0;">
+            <a href="{{ help_requests_admin_url }}" class="button" style="padding: 6px 10px;">Open Help Requests</a>
+        </p>
+    </div>
+
     <div class="module">
         <h2>{% trans "Metrics" %}</h2>
         <ul>
             <li><a href="{% url 'founding:metrics' %}">{% trans "Founding signups metrics" %}</a></li>
+            <li><a href="{{ help_requests_admin_url }}">{% trans "Child help requests" %}</a></li>
         </ul>
     </div>
     {% if app_list %}

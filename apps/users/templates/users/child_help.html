@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+{% load static %}
+{% block navigation %}{% endblock %}
+
+{% block title %}Help - {{ child.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .help-container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 1.5rem 1rem 2rem;
+    }
+
+    .page-top-strip {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 0.75rem;
+    }
+
+    .page-world-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .user-menu {
+        position: relative;
+    }
+
+    .user-menu-toggle {
+        background: white;
+        border: 2px solid #667eea;
+        padding: 8px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        color: #667eea;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .user-menu-toggle:hover {
+        background: #667eea;
+        color: white;
+    }
+
+    #userMenuToggle .burger-icon {
+        display: none;
+    }
+
+    .user-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: white;
+    }
+
+    .user-menu-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        min-width: 220px;
+        display: none;
+        z-index: 1000;
+    }
+
+    .user-menu.active .user-menu-dropdown {
+        display: block;
+    }
+
+    .user-menu-dropdown a,
+    .user-menu-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        color: #333;
+        text-decoration: none;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .user-menu-dropdown a:hover,
+    .user-menu-dropdown button:hover {
+        background: #f3f0ff;
+    }
+
+    .user-menu-divider {
+        height: 1px;
+        background: #e5e7eb;
+        margin: 4px 0;
+    }
+
+    .hero-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        color: white;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .hero-text {
+        margin-top: 0.5rem;
+        opacity: 0.95;
+    }
+
+    .help-form-card,
+    .requests-card {
+        background: white;
+        border-radius: 14px;
+        padding: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        margin: 0 0 0.8rem 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .form-group {
+        margin-bottom: 0.8rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+        color: #111827;
+    }
+
+    .form-control {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font: inherit;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+    }
+
+    .help-submit {
+        border: none;
+        border-radius: 10px;
+        padding: 12px 18px;
+        width: 100%;
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        cursor: pointer;
+        background: linear-gradient(135deg, #ec4899 0%, #7c3aed 100%);
+    }
+
+    .request-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem;
+        margin-top: 0.7rem;
+    }
+
+    .request-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.35rem;
+        flex-wrap: wrap;
+    }
+
+    .request-project {
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 4px 8px;
+        border-radius: 999px;
+    }
+
+    .status-open {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-in_review {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-resolved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .muted {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .staff-reply {
+        margin-top: 0.55rem;
+        background: #eef2ff;
+        border-left: 4px solid #6366f1;
+        padding: 0.65rem 0.7rem;
+        border-radius: 6px;
+        color: #1f2937;
+    }
+
+    .staff-reply-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #4338ca;
+        margin-bottom: 0.3rem;
+    }
+
+    @media (max-width: 768px) {
+        .help-container {
+            padding: 1rem 0.75rem 1.25rem;
+        }
+
+        .page-world-title {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .user-menu-toggle {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            justify-content: center;
+        }
+
+        #userMenuToggle .toggle-text,
+        #userMenuToggle .dropdown-icon,
+        #userMenuToggle .user-avatar {
+            display: none;
+        }
+
+        #userMenuToggle .burger-icon {
+            display: inline;
+        }
+
+        .hero-title {
+            font-size: 1.35rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="help-container">
+    <div class="page-top-strip">
+        <div class="page-world-title">
+            {% if child.age_range == 'NAVIGATORS' %}
+                🧭 Navigators World
+            {% elif child.age_range == 'TRAILBLAZERS' %}
+                🏔️ Trailblazers World
+            {% else %}
+                🚀 Imaginauts World
+            {% endif %}
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <button class="user-menu-toggle" id="userMenuToggle">
+                <div class="user-avatar">{{ child.username|first|upper }}</div>
+                <span class="toggle-text">{{ child.username|truncatechars:12 }}</span>
+                <svg class="burger-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                <svg class="dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div class="user-menu-dropdown">
+                <a href="{% url 'users:child_dashboard' %}">🏠 My Dashboard</a>
+                <a href="{% url 'users:growth_map' %}">🗺️ My Growth Map</a>
+                <a href="{% url 'users:progression_detail' %}">🎯 Progression Stages</a>
+                <a href="{% url 'users:child_help' %}">❓ Help</a>
+                <div class="user-menu-divider"></div>
+                <form method="post" action="{% url 'users:child_logout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit">🚪 Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-card">
+        <h1 class="hero-title">We're Here to Help!</h1>
+        <p class="hero-text">Ask for help anytime. Choose a project if relevant, or send a general question.</p>
+    </div>
+
+    <div class="help-form-card">
+        <h2 class="section-title">Send Help Request</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_project">What project are you working on? (optional)</label>
+                {{ form.project }}
+            </div>
+            <div class="form-group">
+                <label for="id_step">What step are you on? (optional)</label>
+                {{ form.step }}
+            </div>
+            <div class="form-group">
+                <label for="id_problem">What's the problem?</label>
+                {{ form.problem }}
+            </div>
+            <div class="form-group">
+                <label for="id_tried_already">What have you already tried?</label>
+                {{ form.tried_already }}
+            </div>
+            <button type="submit" class="help-submit">Send Help Request</button>
+        </form>
+    </div>
+
+    <div class="requests-card">
+        <h2 class="section-title">My Recent Help Requests</h2>
+        {% if recent_requests %}
+            {% for item in recent_requests %}
+                <div class="request-item">
+                    <div class="request-row">
+                        <div class="request-project">{{ item.project.title|default:'General Question' }}</div>
+                        <span class="status-badge status-{{ item.status }}">{{ item.get_status_display }}</span>
+                    </div>
+                    {% if item.step %}<div class="muted">Step: {{ item.step }}</div>{% endif %}
+                    <div style="margin-top: 0.4rem; color: #1f2937;">{{ item.problem|truncatechars:170 }}</div>
+                    {% if item.staff_reply %}
+                        <div class="staff-reply">
+                            <div class="staff-reply-title">Team reply</div>
+                            <div>{{ item.staff_reply|linebreaksbr }}</div>
+                        </div>
+                    {% endif %}
+                    <div class="muted" style="margin-top: 0.4rem;">{{ item.created_at|timesince }} ago</div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="muted">No help requests yet. If you get stuck, send one above.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+(function() {
+    const userMenu = document.getElementById('userMenu');
+    const userMenuToggle = document.getElementById('userMenuToggle');
+
+    if (userMenu && userMenuToggle) {
+        userMenuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userMenu.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!userMenu.contains(e.target)) {
+                userMenu.classList.remove('active');
+            }
+        });
+    }
+})();
+</script>
+{% endblock %}

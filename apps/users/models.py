@@ -517,6 +517,47 @@ class ProjectProgress(models.Model):
         verbose_name_plural = "Project Progress"
 
 
+class ChildHelpRequest(models.Model):
+    """Child support requests with optional project context."""
+
+    STATUS_OPEN = 'open'
+    STATUS_IN_REVIEW = 'in_review'
+    STATUS_RESOLVED = 'resolved'
+
+    STATUS_CHOICES = [
+        (STATUS_OPEN, 'Open'),
+        (STATUS_IN_REVIEW, 'In Review'),
+        (STATUS_RESOLVED, 'Resolved'),
+    ]
+
+    child = models.ForeignKey(ChildProfile, on_delete=models.CASCADE, related_name='help_requests')
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='help_requests')
+    step = models.CharField(max_length=120, blank=True)
+    problem = models.TextField()
+    tried_already = models.TextField(blank=True)
+    staff_reply = models.TextField(blank=True)
+    responded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='help_request_replies'
+    )
+    responded_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_OPEN)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        project_title = self.project.title if self.project else 'General'
+        return f"{self.child.username} · {project_title} · {self.status}"
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Child Help Request'
+        verbose_name_plural = 'Child Help Requests'
+
+
 # ============================================================================
 # IMAGINAUTS PROGRESSION SYSTEM - Stages & Growth Map
 # ============================================================================

@@ -6,8 +6,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
-from .models import ChildProfile, Subscription, Project, ProjectProgress
-from .forms import ChildProfileForm, ChildLoginForm
+from .models import ChildProfile, Subscription, Project, ProjectProgress, ChildHelpRequest
+from .forms import ChildProfileForm, ChildLoginForm, ChildHelpRequestForm
 from django.db.models import Q, Count
 from datetime import timedelta
 from functools import wraps
@@ -852,6 +852,59 @@ def get_recommended_projects(child, limit=6):
         project.progress = progress_dict.get(project.id)
     
     return recommended
+
+
+@child_session_required
+def child_help(request):
+    """Child help hub with optional project context and request tracking."""
+    child = request.child
+
+    active_progress = ProjectProgress.objects.filter(child=child).select_related('project')
+    active_project_ids = list(active_progress.values_list('project_id', flat=True).distinct())
+    project_queryset = Project.objects.filter(id__in=active_project_ids).order_by('title')
+
+    prefill_project = request.GET.get('project')
+    prefill_step = request.GET.get('step', '').strip()
+    selected_project = None
+
+    if prefill_project and prefill_project.isdigit():
+        selected_project = Project.objects.filter(id=int(prefill_project)).first()
+        if selected_project and selected_project.id not in active_project_ids:
+            project_queryset = Project.objects.filter(
+                Q(id__in=active_project_ids) | Q(id=selected_project.id)
+            ).distinct().order_by('title')
+
+    initial_data = {}
+    if selected_project:
+        initial_data['project'] = selected_project
+    if prefill_step:
+        initial_data['step'] = prefill_step
+
+    if request.method == 'POST':
+        form = ChildHelpRequestForm(
+            request.POST,
+            project_queryset=project_queryset,
+        )
+        if form.is_valid():
+            help_request = form.save(commit=False)
+            help_request.child = child
+            help_request.save()
+            messages.success(request, 'Help request sent! We will review it and reply soon.')
+            return redirect('users:child_help')
+    else:
+        form = ChildHelpRequestForm(
+            initial=initial_data,
+            project_queryset=project_queryset,
+        )
+
+    recent_requests = child.help_requests.select_related('project')[:8]
+
+    context = {
+        'child': child,
+        'form': form,
+        'recent_requests': recent_requests,
+    }
+    return render(request, 'users/child_help.html', context)
 
 
 @child_session_required

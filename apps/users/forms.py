@@ -1,5 +1,5 @@
 from django import forms
-from .models import ChildProfile
+from .models import ChildProfile, ChildHelpRequest, Project
 
 
 class ChildLoginForm(forms.Form):
@@ -123,3 +123,39 @@ class ChildProfileForm(forms.ModelForm):
                 raise forms.ValidationError('PIN must contain only numbers.')
         
         return cleaned_data
+
+
+class ChildHelpRequestForm(forms.ModelForm):
+    """Help form where project context is optional."""
+
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.none(),
+        required=False,
+        empty_label='General question (not tied to one project)',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = ChildHelpRequest
+        fields = ['project', 'step', 'problem', 'tried_already']
+        widgets = {
+            'step': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Step 3: Testing colors'
+            }),
+            'problem': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': "Describe what isn't working or where you're stuck..."
+            }),
+            'tried_already': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': "Tell us what you've already tried so we can suggest something new."
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        project_queryset = kwargs.pop('project_queryset', Project.objects.none())
+        super().__init__(*args, **kwargs)
+        self.fields['project'].queryset = project_queryset

@@ -19,6 +19,7 @@ urlpatterns = [
     path("kids/logout/", views.child_logout, name="child_logout"),
     path("kids/quiz/", views.child_quiz, name="child_quiz"),
     path("kids/quiz/results/", views.quiz_results, name="quiz_results"),
+    path("kids/help/", views.child_help, name="child_help"),
     path("child/<int:child_id>/reset-quiz/", views.reset_child_quiz, name="reset_child_quiz"),
     path("projects/<int:project_id>/", views.project_detail, name="project_detail"),
     # Growth Map & Progression routes

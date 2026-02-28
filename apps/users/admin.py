@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django import forms
+from django.utils import timezone
 from tinymce.widgets import TinyMCE
 import json
 from .models import (
     ParentProfile, ChildProfile, Subscription, Project, ProjectProgress,
     ProgressionStage, GrowthPathway, ProjectSkillMapping, InspirationShare,
-    Skill, ProjectSkill, ProjectInstructionStep
+    Skill, ProjectSkill, ProjectInstructionStep, ChildHelpRequest
 )
 
 
@@ -251,6 +252,42 @@ class ProjectProgressAdmin(admin.ModelAdmin):
             "fields": ("notes", "reflection_text", "has_reflection", "reflection_at")
         }),
     )
+
+
+@admin.register(ChildHelpRequest)
+class ChildHelpRequestAdmin(admin.ModelAdmin):
+    list_display = ("child", "project", "status", "created_at", "responded_at", "responded_by")
+    search_fields = ("child__username", "project__title", "problem", "step")
+    list_filter = ("status", "created_at")
+    readonly_fields = ("created_at", "updated_at", "responded_by", "responded_at")
+    fieldsets = (
+        ("Request", {
+            "fields": ("child", "project", "step", "status")
+        }),
+        ("Details", {
+            "fields": ("problem", "tried_already")
+        }),
+        ("Support Reply", {
+            "fields": ("staff_reply", "responded_by", "responded_at")
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at")
+        }),
+    )
+
+    def save_model(self, request, obj, form, change):
+        previous_reply = ""
+        if change:
+            previous_reply = ChildHelpRequest.objects.filter(pk=obj.pk).values_list('staff_reply', flat=True).first() or ""
+
+        has_new_reply = bool(obj.staff_reply.strip()) and obj.staff_reply != previous_reply
+        if has_new_reply:
+            obj.responded_by = request.user
+            obj.responded_at = timezone.now()
+            if obj.status == ChildHelpRequest.STATUS_OPEN:
+                obj.status = ChildHelpRequest.STATUS_IN_REVIEW
+
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(ProgressionStage)

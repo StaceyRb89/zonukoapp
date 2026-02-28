@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% block navigation %}{% endblock %}
 
 {% block title %}{{ project.emoji }} {{ project.title }}{% endblock %}
 
@@ -227,6 +228,18 @@ function closeStageModal() {
         margin: 30px 0;
     }
 
+    .help-cta {
+        display: inline-block;
+        margin-top: 8px;
+        color: var(--age-accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .help-cta:hover {
+        text-decoration: underline;
+    }
+
     .rating-stars {
         text-align: center;
         margin: 30px 0;
@@ -257,11 +270,22 @@ function closeStageModal() {
         border-radius: 20px;
         font-weight: 600;
         margin: 10px 0;
+        border: none;
     }
 
     .status-not-started {
         background: #e2e8f0;
         color: #4a5568;
+    }
+
+    .status-start-btn {
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .status-start-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
     .status-in-progress {
@@ -356,7 +380,25 @@ function closeStageModal() {
         </div>
 
         {% if progress.status == 'not_started' %}
-            <span class="status-badge status-not-started">🆕 Not Started</span>
+            <form method="post" style="display: inline; margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="start">
+                <button type="submit" class="status-badge status-not-started status-start-btn">
+                    {% if child.current_stage == 'EXPLORER' %}
+                        🌱 Start Exploring
+                    {% elif child.current_stage == 'EXPERIMENTER' %}
+                        🔍 Start Experimenting
+                    {% elif child.current_stage == 'BUILDER' %}
+                        🧱 Start Building
+                    {% elif child.current_stage == 'DESIGNER' %}
+                        🛠 Start Designing
+                    {% elif child.current_stage == 'INDEPENDENT_MAKER' %}
+                        🔥 Start Creating
+                    {% else %}
+                        🚀 Start Project
+                    {% endif %}
+                </button>
+            </form>
         {% elif progress.status == 'in_progress' %}
             <span class="status-badge status-in-progress">🚀 In Progress</span>
         {% elif progress.status == 'completed' %}
@@ -445,19 +487,16 @@ function closeStageModal() {
 
     <!-- Action Buttons -->
     <div class="action-buttons">
-        {% if progress.status == 'not_started' %}
-            <form method="post" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="start">
-                <button type="submit" class="btn-project">🚀 Start This Project!</button>
-            </form>
-        {% elif progress.status == 'in_progress' %}
+        {% if progress.status == 'in_progress' %}
             <form method="post" style="display: inline;">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="complete">
                 <button type="submit" class="btn-project">✅ Mark as Complete!</button>
             </form>
         {% endif %}
+        <div>
+            <a href="{% url 'users:child_help' %}?project={{ project.id }}" class="help-cta">❓ Need help with this project?</a>
+        </div>
     </div>
 
     <!-- Rating System (only shown after completion) -->
