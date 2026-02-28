@@ -6,6 +6,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Zonuko{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <style>
+        .flash-messages {
+            max-width: 1100px;
+            margin: 16px auto 0;
+            padding: 0 16px;
+        }
+
+        .flash-message {
+            list-style: none;
+            margin: 0 0 10px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
+            color: var(--text);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            opacity: 1;
+            transition: opacity 300ms ease, transform 300ms ease;
+        }
+
+        .flash-message-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flash-message::before {
+            content: "ℹ️";
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .flash-message.error {
+            background: linear-gradient(135deg, #ffe7ec 0%, #ffdce2 100%);
+            color: #8a1f2f;
+            border-color: #ffc7d1;
+        }
+
+        .flash-message.error::before {
+            content: "⛔";
+        }
+
+        .flash-message.warning {
+            background: linear-gradient(135deg, #fff5d6 0%, #ffefc1 100%);
+            color: #7a5a00;
+            border-color: #ffe4a6;
+        }
+
+        .flash-message.warning::before {
+            content: "⚠️";
+        }
+
+        .flash-message.info {
+            background: linear-gradient(135deg, #e8f3ff 0%, #d9ebff 100%);
+            color: #1e4f84;
+            border-color: #bddcff;
+        }
+
+        .flash-message.success {
+            background: linear-gradient(135deg, #e9f8f0 0%, #ddf5e8 100%);
+            color: #1f6b45;
+            border-color: #c5ebd7;
+        }
+
+        .flash-message.success::before {
+            content: "✅";
+        }
+
+        .flash-message-close {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            opacity: 0.75;
+        }
+
+        .flash-message-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .flash-message.is-dismissing {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -13,6 +108,18 @@
         {% block navigation %}
         {% include 'partials/nav.html' %}
         {% endblock %}
+
+        {% if messages %}
+        <ul class="flash-messages">
+            {% for message in messages %}
+            <li class="flash-message {{ message.tags }}" data-flash-message>
+                <span class="flash-message-content">{{ message }}</span>
+                <button type="button" class="flash-message-close" aria-label="Dismiss message" data-flash-close>×</button>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
         <main class="main">
             {% block content %}{% endblock %}
         </main>
@@ -20,5 +127,34 @@
         {% include 'partials/footer.html' %}
         {% endblock %}
     </div>
+    <script>
+        (function () {
+            const AUTO_DISMISS_MS = 10000;
+
+            const dismiss = (messageElement) => {
+                if (!messageElement || messageElement.classList.contains('is-dismissing')) {
+                    return;
+                }
+                messageElement.classList.add('is-dismissing');
+                window.setTimeout(() => {
+                    messageElement.remove();
+                }, 300);
+            };
+
+            document.querySelectorAll('[data-flash-message]').forEach((messageElement) => {
+                window.setTimeout(() => dismiss(messageElement), AUTO_DISMISS_MS);
+            });
+
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-flash-close]');
+                if (!button) {
+                    return;
+                }
+
+                const messageElement = button.closest('[data-flash-message]');
+                dismiss(messageElement);
+            });
+        })();
+    </script>
 </body>
 </html>

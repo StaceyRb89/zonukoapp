@@ -430,6 +430,11 @@ class Project(models.Model):
     # Content
     materials_needed = models.TextField(blank=True)
     instructions = models.TextField(blank=True)
+    instruction_steps = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Optional structured steps. Example: [{"title": "Step 1", "description": "Do this", "image_url": "https://..."}]'
+    )
     
     # Publishing & visibility
     visibility = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default=VISIBILITY_HIDDEN)
@@ -455,6 +460,26 @@ class Project(models.Model):
         ordering = ['-is_featured', '-order_priority', '-created_at']
         verbose_name = "Project"
         verbose_name_plural = "Projects"
+
+
+class ProjectInstructionStep(models.Model):
+    """Structured project instruction step with optional uploaded image."""
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='instruction_step_items')
+    order = models.PositiveIntegerField(default=1)
+    title = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='instruction_steps/', blank=True, null=True)
+    image_alt_text = models.CharField(max_length=180, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = 'Project Instruction Step'
+        verbose_name_plural = 'Project Instruction Steps'
+
+    def __str__(self):
+        return f"{self.project.title} — Step {self.order}: {self.title}"
 
 
 class ProjectProgress(models.Model):

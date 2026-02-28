@@ -167,7 +167,6 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 # Development override: allow login without email verification
 if DEBUG:
     ACCOUNT_EMAIL_VERIFICATION = "none"
-    ACCOUNT_EMAIL_REQUIRED = False
     ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
 
 # Email settings

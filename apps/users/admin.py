@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django import forms
 from tinymce.widgets import TinyMCE
+import json
 from .models import (
     ParentProfile, ChildProfile, Subscription, Project, ProjectProgress,
     ProgressionStage, GrowthPathway, ProjectSkillMapping, InspirationShare,
-    Skill, ProjectSkill
+    Skill, ProjectSkill, ProjectInstructionStep
 )
 
 
@@ -32,6 +33,15 @@ class ProjectAdminForm(forms.ModelForm):
         }),
         help_text="Enter tags separated by commas. Common tags: science, art, coding, robots, experiments, nature, space, chemistry, physics, building, crafts, music, engineering"
     )
+
+    instruction_steps_input = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 10,
+            'style': 'width: 100%; font-family: monospace;'
+        }),
+        help_text='Optional JSON list for visual step cards. Example: [{"title":"Step 1","description":"Do this","image_url":"https://..."}]'
+    )
     
     class Meta:
         model = Project
@@ -50,6 +60,8 @@ class ProjectAdminForm(forms.ModelForm):
                 self.initial['age_ranges'] = self.instance.age_ranges
             if self.instance.tags:
                 self.initial['tags_input'] = ', '.join(self.instance.tags)
+            if self.instance.instruction_steps:
+                self.initial['instruction_steps_input'] = json.dumps(self.instance.instruction_steps, indent=2)
     
     def clean_age_ranges(self):
         """Convert selected checkboxes to list"""
@@ -64,6 +76,22 @@ class ProjectAdminForm(forms.ModelForm):
             cleaned_data['tags'] = tags
         else:
             cleaned_data['tags'] = []
+
+        instruction_steps_input = cleaned_data.get('instruction_steps_input', '').strip()
+        if instruction_steps_input:
+            try:
+                parsed = json.loads(instruction_steps_input)
+            except json.JSONDecodeError:
+                self.add_error('instruction_steps_input', 'Enter valid JSON (a list of step objects).')
+                parsed = []
+
+            if parsed and not isinstance(parsed, list):
+                self.add_error('instruction_steps_input', 'Instruction steps JSON must be a list.')
+                parsed = []
+
+            cleaned_data['instruction_steps'] = parsed
+        else:
+            cleaned_data['instruction_steps'] = []
         return cleaned_data
     
     def save(self, commit=True):
@@ -71,6 +99,7 @@ class ProjectAdminForm(forms.ModelForm):
         # Ensure age_ranges and tags are saved as lists
         instance.age_ranges = self.cleaned_data.get('age_ranges', [])
         instance.tags = self.cleaned_data.get('tags', [])
+        instance.instruction_steps = self.cleaned_data.get('instruction_steps', [])
         if commit:
             instance.save()
         return instance
@@ -127,6 +156,15 @@ class ProjectSkillInline(admin.TabularInline):
     verbose_name_plural = "Skills"
 
 
+class ProjectInstructionStepInline(admin.StackedInline):
+    model = ProjectInstructionStep
+    extra = 1
+    fields = ("order", "title", "description", "image", "image_alt_text")
+    ordering = ("order", "id")
+    verbose_name = "Instruction Step"
+    verbose_name_plural = "Instruction Steps (with optional uploaded images)"
+
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     form = ProjectAdminForm
@@ -136,7 +174,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_editable = ("is_featured",)
     readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("prerequisites",)
-    inlines = (ProjectSkillInline,)
+    inlines = (ProjectSkillInline, ProjectInstructionStepInline)
     
     fieldsets = (
         ("📝 Basic Information", {
@@ -154,7 +192,7 @@ class ProjectAdmin(admin.ModelAdmin):
             "description": "Upload video file OR paste YouTube/Vimeo URL (not both)"
         }),
         ("📚 Content", {
-            "fields": ("materials_needed", "instructions"),
+            "fields": ("materials_needed", "instructions", "instruction_steps_input"),
             "classes": ("collapse",)
         }),
         ("⚙️ Publishing & Visibility", {

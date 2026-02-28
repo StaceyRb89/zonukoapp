@@ -10,10 +10,40 @@ from .models import ChildProfile, Subscription, Project, ProjectProgress
 from .forms import ChildProfileForm, ChildLoginForm
 from django.db.models import Q, Count
 from datetime import timedelta
+from functools import wraps
 import stripe
 import json
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+def child_session_required(view_func=None, *, api=False):
+    """Require a valid child session for kid-facing routes and APIs."""
+    def decorator(func):
+        @wraps(func)
+        def _wrapped(request, *args, **kwargs):
+            child_id = request.session.get('child_id')
+            if not child_id:
+                if api:
+                    return JsonResponse({'error': 'Not logged in'}, status=401)
+                return redirect('users:child_login')
+
+            try:
+                child = ChildProfile.objects.get(id=child_id)
+            except ChildProfile.DoesNotExist:
+                request.session.flush()
+                if api:
+                    return JsonResponse({'error': 'Not logged in'}, status=401)
+                return redirect('users:child_login')
+
+            request.child = child
+            return func(request, *args, **kwargs)
+
+        return _wrapped
+
+    if view_func is None:
+        return decorator
+    return decorator(view_func)
 
 
 
@@ -517,6 +547,7 @@ def child_login(request):
     return render(request, 'users/child_login.html', {'form': form})
 
 
+@child_session_required
 def child_dashboard(request):
     """
     Child dashboard - their world based on age_range.
@@ -525,17 +556,7 @@ def child_dashboard(request):
     For Navigators (11-13): [Future - skill-focused]
     For Trailblazers (14-16): [Future - challenge-focused]
     """
-    child_id = request.session.get('child_id')
-    
-    if not child_id:
-        return redirect('users:child_login')
-    
-    try:
-        child = ChildProfile.objects.get(id=child_id)
-    except ChildProfile.DoesNotExist:
-        # Invalid session, clear it
-        request.session.flush()
-        return redirect('users:child_login')
+    child = request.child
     
     # Redirect to quiz if not completed
     if not child.quiz_completed:
@@ -609,30 +630,9 @@ def child_dashboard(request):
     # Use query engine to get projects for this child
     from apps.users.query_engine import ProjectQueryEngine
     engine = ProjectQueryEngine(child)
-    available_projects = list(engine.get_available())  # Get ALL available projects (excludes HIDDEN)
-
-    # Get all progress for available projects (excludes progress on hidden/unavailable projects)
-    available_project_ids = [p.id for p in available_projects]
-    progress_lookup = {
-        progress.project_id: progress
-        for progress in child.project_progress.filter(project_id__in=available_project_ids).select_related('project')
-    }
-
-    # Attach progress to each available project
-    for project in available_projects:
-        project.progress = progress_lookup.get(project.id)
-
-    # Filter projects by their current status (only from available projects)
-    in_progress_projects = [
-        project for project in available_projects
-        if project.progress and project.progress.status == ProjectProgress.STATUS_IN_PROGRESS
-    ]
-    
-    # New projects = available but not started (no progress at all OR status is NOT_STARTED)
-    new_projects = [
-        project for project in available_projects
-        if not project.progress or project.progress.status == ProjectProgress.STATUS_NOT_STARTED
-    ]
+    dashboard_lists = engine.get_dashboard_lists(new_limit=2)
+    in_progress_projects = dashboard_lists['in_progress_projects']
+    new_projects = dashboard_lists['new_projects']
     
     # Completed projects should come from all child's progress, not just available ones
     # (child may have completed a project that's now above their stage due to stage changes)
@@ -686,24 +686,17 @@ def child_dashboard(request):
     return render(request, 'users/child_dashboard.html', context)
 
 
+@child_session_required
 def child_logout(request):
     """Logout child"""
     request.session.flush()
     return redirect('users:child_login')
 
 
+@child_session_required
 def child_quiz(request):
     """Fun learning style quiz for kids - age-appropriate questions and styling"""
-    child_id = request.session.get('child_id')
-    
-    if not child_id:
-        return redirect('users:child_login')
-    
-    try:
-        child = ChildProfile.objects.get(id=child_id)
-    except ChildProfile.DoesNotExist:
-        request.session.flush()
-        return redirect('users:child_login')
+    child = request.child
     
     if request.method == 'POST':
         # Calculate quiz results from answers
@@ -788,18 +781,10 @@ def child_quiz(request):
     return render(request, 'users/child_quiz.html', context)
 
 
+@child_session_required
 def quiz_results(request):
     """Show quiz results"""
-    child_id = request.session.get('child_id')
-    
-    if not child_id:
-        return redirect('users:child_login')
-    
-    try:
-        child = ChildProfile.objects.get(id=child_id)
-    except ChildProfile.DoesNotExist:
-        request.session.flush()
-        return redirect('users:child_login')
+    child = request.child
     
     context = {
         'child': child
@@ -869,14 +854,10 @@ def get_recommended_projects(child, limit=6):
     return recommended
 
 
+@child_session_required
 def project_detail(request, project_id):
     """Display individual project details for kids"""
-    # Get the child from session
-    child_id = request.session.get('child_id')
-    if not child_id:
-        return redirect('users:child_login')
-    
-    child = get_object_or_404(ChildProfile, id=child_id)
+    child = request.child
     # Use visibility check instead of is_published
     project = get_object_or_404(Project, id=project_id)
     
@@ -899,6 +880,50 @@ def project_detail(request, project_id):
             video_embed_url = f'https://player.vimeo.com/video/{video_id}'
         else:
             video_embed_url = url
+
+    # Normalize visual instruction steps and provide text fallback
+    instruction_steps = []
+    uploaded_steps = list(project.instruction_step_items.all())
+    if uploaded_steps:
+        for step in uploaded_steps:
+            image_url = step.image.url if step.image else ''
+            instruction_steps.append({
+                'title': step.title,
+                'description': step.description,
+                'image_url': image_url,
+                'image_alt_text': step.image_alt_text or step.title,
+            })
+    else:
+        raw_steps = project.instruction_steps if isinstance(project.instruction_steps, list) else []
+        for index, step in enumerate(raw_steps, start=1):
+            if isinstance(step, dict):
+                title = step.get('title') or f"Step {index}"
+                description = step.get('description') or step.get('text') or ''
+                image_url = step.get('image_url') or step.get('image') or ''
+                image_alt_text = step.get('image_alt_text') or title
+            else:
+                title = f"Step {index}"
+                description = str(step)
+                image_url = ''
+                image_alt_text = title
+
+            if description.strip() or image_url.strip():
+                instruction_steps.append({
+                    'title': title,
+                    'description': description,
+                    'image_url': image_url,
+                    'image_alt_text': image_alt_text,
+                })
+
+    if not instruction_steps and project.instructions:
+        lines = [line.strip() for line in project.instructions.splitlines() if line.strip()]
+        for index, line in enumerate(lines, start=1):
+            instruction_steps.append({
+                'title': f"Step {index}",
+                'description': line,
+                'image_url': '',
+                'image_alt_text': f"Step {index}",
+            })
     
     # Check if child's age is in project's target ages
     if child.age_range not in project.age_ranges:
@@ -940,6 +965,7 @@ def project_detail(request, project_id):
         'project': project,
         'progress': progress,
         'video_embed_url': video_embed_url,
+        'instruction_steps': instruction_steps,
     }
     return render(request, 'users/project_detail.html', context)
 
@@ -948,21 +974,10 @@ def project_detail(request, project_id):
 # GROWTH MAP & PROGRESSION VIEWS
 # ============================================================================
 
-def get_child_from_session(request):
-    """Helper to get child from session"""
-    child_id = request.session.get('child_id')
-    if child_id:
-        from .models import ChildProfile
-        return get_object_or_404(ChildProfile, id=child_id)
-    return None
-
-
-@login_required
+@child_session_required
 def growth_map(request):
     """Display child's visual growth map and skill pathways"""
-    child = get_child_from_session(request)
-    if not child:
-        return redirect('users:child_login')
+    child = request.child
     
     # Calculate pathway percentages (out of 100 max)
     pathways = [
@@ -1054,12 +1069,10 @@ def growth_map(request):
     return render(request, 'users/growth_map.html', context)
 
 
-@login_required
+@child_session_required(api=True)
 def growth_summary_api(request):
     """API endpoint to get child's growth summary for dashboard"""
-    child = get_child_from_session(request)
-    if not child:
-        return JsonResponse({'error': 'Not logged in'}, status=401)
+    child = request.child
     
     from .models import ProgressionStage, GrowthPathway
     
@@ -1093,14 +1106,13 @@ def growth_summary_api(request):
     return JsonResponse(growth_summary)
 
 
+@child_session_required(api=True)
 def update_reflection(request, progress_id):
     """Save a child's project reflection and apply growth boosts"""
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=400)
     
-    child = get_child_from_session(request)
-    if not child:
-        return JsonResponse({'error': 'Not logged in'}, status=401)
+    child = request.child
     
     progress = get_object_or_404(ProjectProgress, id=progress_id, child=child)
     
@@ -1138,7 +1150,7 @@ def update_reflection(request, progress_id):
     return JsonResponse(response)
 
 
-@login_required
+@child_session_required(api=True)
 def clear_stage_modal(request):
     """Clear stage advancement modal from session"""
     if 'stage_advancement' in request.session:
@@ -1148,12 +1160,10 @@ def clear_stage_modal(request):
     return JsonResponse({'success': True})
 
 
-@login_required
+@child_session_required
 def progression_detail(request):
     """Show detailed progression information"""
-    child = get_child_from_session(request)
-    if not child:
-        return redirect('users:child_login')
+    child = request.child
     
     from .models import ProgressionStage
     

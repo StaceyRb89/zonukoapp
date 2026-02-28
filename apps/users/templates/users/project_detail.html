@@ -302,6 +302,43 @@ function closeStageModal() {
     .back-link:hover {
         text-decoration: underline;
     }
+
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .step-card {
+        background: var(--age-bg);
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .step-image {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        display: block;
+        background: #f3f4f6;
+    }
+
+    .step-body {
+        padding: 14px;
+    }
+
+    .step-title {
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .delivery-note {
+        font-size: 0.95rem;
+        color: #4b5563;
+        margin-top: -6px;
+        margin-bottom: 14px;
+    }
 </style>
 
 <div class="project-container">
@@ -330,6 +367,7 @@ function closeStageModal() {
     <!-- Video Player -->
     {% if project.video_file or project.video_url %}
     <div class="video-container">
+        <div style="font-weight:700; margin-bottom: 10px;">🎬 Watch the walkthrough</div>
         <div class="video-wrapper">
             {% if project.video_file %}
                 <video controls>
@@ -355,6 +393,7 @@ function closeStageModal() {
     {% if project.materials_needed %}
     <div class="content-card">
         <h2>🛠️ What You'll Need</h2>
+        <p class="delivery-note">Gather materials first so your build session is smooth.</p>
         <ul class="materials-list">
             {% for line in project.materials_needed.splitlines %}
                 {% if line.strip %}
@@ -369,7 +408,28 @@ function closeStageModal() {
     {% if project.instructions %}
     <div class="content-card">
         <h2>📝 Instructions</h2>
+        <p class="delivery-note">Written guide: follow this alongside the video and visual cards.</p>
         <div>{{ project.instructions|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if instruction_steps %}
+    <div class="content-card">
+        <h2>🖼️ Visual Step Guide</h2>
+        <p class="delivery-note">Step-by-step cards to make each part easier to follow.</p>
+        <div class="steps-grid">
+            {% for step in instruction_steps %}
+            <div class="step-card">
+                {% if step.image_url %}
+                <img src="{{ step.image_url }}" alt="{{ step.image_alt_text|default:step.title }}" class="step-image">
+                {% endif %}
+                <div class="step-body">
+                    <div class="step-title">{{ step.title }}</div>
+                    <div>{{ step.description }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 
